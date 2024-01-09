@@ -1,0 +1,61 @@
+<div class="container">
+    <h1>Create a new Classic</h1>
+    <form style="padding-top: 25px;">
+        <div class="form-group">
+            <label for="make">Make</label>
+            <input type="text" class="form-control" id="make" required>
+            <small id="makeEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="model">Type/Model</label>
+            <input type="text" class="form-control" id="model" required>
+            <small id="modelEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="year">Year of Manufacture</label>
+            <input type="text" class="form-control" id="year" required>
+            <small id="yearEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="licencePlate">License Plate</label>
+            <input type="text" class="form-control" id="licencePlate" required>
+            <small id="licencePlateEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <select class="form-select" name="country" id="country">
+                <option value="" disabled selected>Select Country</option>
+                <option *ngFor="let country of countries" [value]="country.name">{{country.name}}</option>
+           </select>
+           <small id="countryEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="chassisNo">Chassis Number / VIN </label>
+            <input type="text" class="form-control" id="chassisNo" required>
+            <small id="chassisNoEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="engineNo">Engine Number</label>
+            <input type="text" class="form-control" id="engineNo" required>
+            <small id="engineNoEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="ownerEmail">Owner</label>
+            <select class="form-select" id="ownerEmail">
+                <option value="" disabled selected>Select the owner's email:</option>
+                <option *ngFor="let user of users" value="{{user.email}}">{{user.firstname}} {{user.surname}} | Email: {{user.email}} | Role: {{user.role}} | Country: {{user.country}}</option>
+            </select>
+            <small id="ownerEmailEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <input type="checkbox" class="form-check-input" id="confirmCheckbox" name="confirmCheckbox" [(ngModel)]="isConfirmed"/>
+            <label class="form-check-label" for="confirmCheckbox">
+                By clicking this box, I confirm that I want to create this classic vehicle and its chassis number/VIN is correct (it can not be changed later).
+            </label>
+        </div>
+        <button type="submit" class="btn btn-success" [disabled]="!isConfirmed" (click)="onSubmit()">Create Classic</button>
+            <div *ngIf="showSpinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only"></span>
+            </div> 
+    </form>
+</div>

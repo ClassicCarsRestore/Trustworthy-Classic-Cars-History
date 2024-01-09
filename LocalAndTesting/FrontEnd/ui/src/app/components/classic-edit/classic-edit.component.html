@@ -1,0 +1,55 @@
+<div *ngIf="!classic" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="classic">
+    <div class="container">
+        <h1>Editing Classic: {{ this.classic.make + " " + this.classic.model + " " + this.classic.year }}</h1>
+        <form style="padding-top: 25px;">
+            <div class="form-group">
+                <label for="chassiNo">Chassis Number /VIN</label>
+                <input type="text" class="form-control" id="chassisNo" value="{{ this.classic.chassisNo }}" disabled>
+            </div>
+            <div class="form-group">
+                <label for="make">Make</label>
+                <input type="text" class="form-control" id="make" value="{{ this.classic.make }}" required>
+                <small id="makeEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="model">Type/Model</label>
+                <input type="text" class="form-control" id="model" value="{{ this.classic.model }}" required>
+                <small id="modelEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="year">Year of Manufacture</label>
+                <input type="text" class="form-control" id="year" value="{{ this.classic.year }}" required>
+                <small id="yearEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="licencePlate">License Plate</label>
+                <input type="text" class="form-control" id="licencePlate" value="{{ this.classic.licencePlate }}"
+                    required>
+                <small id="licencePlateEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+            <label for="country">Country</label>
+            <select class="form-select" name="country" id="country">
+                <option value="{{ this.classic.country }}" disabled selected>{{ this.classic.country }}</option>
+                <option *ngFor="let country of countries" [value]="country.name">{{country.name}}</option>
+           </select>
+           <small id="countryEmpty" class="form-text" style="color:red"></small>
+        </div>
+            <div class="form-group">
+                <label for="engineNo">Engine Number</label>
+                <input type="text" class="form-control" id="engineNo" value="{{ this.classic.engineNo }}" required>
+                <small id="engineNoEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="onSubmit()">Update Info</button>
+            <div *ngIf="showSpinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only"></span>
+            </div> 
+        </form>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<header>
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+		<div class="container">
+			<a class="navbar-brand vertical-center" matRipple [routerLink]="['/']">
+				<img src="assets/img/hlf_logo.png" height="30" class="icon" alt="HLF Logo"/>
+				<img src="assets/img/RJBlogo.png" height="30" class="icon" alt="Raimundo Branco Logo"/>ClassicsChain
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse"
+				aria-label="Toggle navigation" [attr.aria-expanded]="isExpanded" (click)="toggle()">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="navbar-collapse collapse d-sm-inline-flex justify-content-end" [ngClass]="{ show: isExpanded }">
+				<ul class="navbar-nav flex-grow">
+					<li class="nav-item" matRipple [routerLinkActive]="['link-active']" *ngIf="isLoggedIn()">
+						<a class="nav-link text-dark" [routerLink]="['/classics']"><i class="bi bi-card-list"></i> Your Classics</a>
+					</li>
+					<li class="nav-item" matRipple [routerLinkActive]="['link-active']">
+						<a class="nav-link text-dark" [routerLink]="['/about']"><i class="bi bi-info-circle"></i> About Us</a>
+					</li>
+					<li class="nav-item" matRipple [routerLinkActive]="['link-active']" *ngIf="!isLoggedIn()">
+						<a class="nav-link text-dark" [routerLink]="['/login']"><i class="bi bi-unlock"></i> Login</a>
+					</li>
+					<li class="nav-item" matRipple [routerLinkActive]="['link-active']" *ngIf="isLoggedIn()">
+						<a class="nav-link text-dark" (click)="logout()" [routerLink]="['/login']"><i class="bi bi-lock"></i> Logout</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>

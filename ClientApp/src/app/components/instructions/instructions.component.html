@@ -1,0 +1,318 @@
+<div>
+    <div class="container">
+        <div class="hdr">
+            <h1>Instructions of Use</h1>
+            <i class="bi bi-person"></i><p>: Allowed by the classic's <b>Owner</b></p>
+            <i class="bi bi-wrench-adjustable"></i><p>: Allowed by <b>Restoration shops</b></p>
+            <i class="bi bi-clipboard-check"></i><p>: Allowed by <b>Certification authorities shops</b></p>
+            <i class="bi bi-people"></i><p>: Allowed by all users</p>
+        </div>
+        <form #loginInfo>
+            <i class="bi bi-people corner3"></i>
+            <i class="bi bi-wrench-adjustable corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Login:</h2>
+            <h6>How to login to an already registered account?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If not logged in, the <a href="http://194.210.120.34:4200/login" target="_blank">Login page</a> will be your homepage. (You can also access it by clicking in the "Login" button on the top right corner, or by clicking in our logo)</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> Fill in the boxes with your email address and password, and choose your associated organization.</p>
+                </div>
+                <div class="col">
+                    <p><b>3º:</b> Click the "Submit" button.</p>
+                </div>
+            </div>
+        </form>
+        <form #registerInfo>
+            <i class="bi bi-people corner3"></i>
+            <i class="bi bi-wrench-adjustable corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Register a new Account:</h2>
+            <h6>How to register a new account?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> In the Login page, click the "<a href="http://194.210.120.34:4200/signup" target="_blank">register</a>" link/button. This will redirect you to the Register page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> Fill in all the fields:</p>
+                    <ul>
+                        <li>First Name / Type of Entity</li>
+                        <li>Surname / Name of the Company</li>
+                        <li>Country</li>
+                        <li>Email</li>
+                        <li>Password (repeat the password)</li>
+                        <li>Organization</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <p><b>3º:</b> Check the box confirming all your details are correct and click the "Register" button.</p>
+                </div>
+            </div>
+        </form>
+        <form #classicsInfo>
+            <i class="bi bi-person corner"></i>
+            <h2>Check your Classics:</h2>
+            <h6>How to check all the cars I own?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If logged in, you can click the "<a href="http://194.210.120.34:4200/classics" target="_blank">Your Classics</a>" button in the Navigation Bar, which is available on top of each page.</p>
+                </div>
+                <div class="col">
+                    <p><b>2º:</b> This will redirect you to the page where the classics owned by the logged user are display. Some additional details from each vehicle are also displayed.
+                    The button to redirect to each Vehicle Card is also displayed.</p>
+                </div>
+            </div>
+        </form>
+        <form #vehicleCardInfo>
+            <i class="bi bi-people corner3"></i>
+            <i class="bi bi-wrench-adjustable corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Check a Classic Vehicle Card:</h2>
+            <h6>How to check a specific Vehicle Card?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> In the <a href="http://194.210.120.34:4200/classics" target="_blank">Classics page</a>, click the "Vehicle Card" button.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> When the page is loaded, it is displayed basic information about the vehicle, such as make, model, VIN, prior owners and other in the "<i class="bi bi-bar-chart-steps"></i>&nbsp;Vehicle Data" Tab</p>
+                </div>
+                <div class="col margin">
+                    <p><b>3º:</b> On the top right corner, you can click the "Click to Copy Link" button to automatically copy the link of that classic, to then share with another user.
+                    (This user must have been granted permissions priorly in order to be able to have access to that vehicle.)</p>
+                </div>
+                <div class="col">
+                    <p><b>4º:</b> If logged in as the <b>owner</b> of the classic, 4 buttons are displayed: "<i class="bi bi-pencil"></i> Edit Information", "<i class="bi bi-book"></i> History", "<i class="bi bi-person-lock"></i> Access Permissions" and "<i class="bi bi-book-half"></i> Access History".
+                    For other users, only 1 button is displayed, which is the "<i class="bi bi-book"></i> History" button.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>5º:</b> To check the Restorations applied you can click the Dropdown named "<i class="bi bi-tools"></i>&nbsp; Restorations". This will open a new Tab with cards for each restoration applied.</p>
+                </div> 
+                <div class="col margin">
+                    <p><b>6º:</b> Each Restoration card has information about:</p>
+                    <ul>
+                        <li>Restoration title</li>
+                        <li>Restoration description</li>
+                        <li>Who made the restoration (it is possible to click it to get more information about the user/entity)</li>
+                        <li>The date and time when the restoration was added</li>
+                        <li>A <i class="bi bi-pencil"></i> button to edit the details and photos (only who originally made it is able to edit it)</li>
+                        <li>A <i class="bi bi-images"></i> button to display the photos associated.</li>
+                    </ul>
+                </div>
+                <div class="col margin">
+                    <p><b>7º:</b> For <b>Owners</b> and <b>Restoration entities</b> a button "<i class="bi bi-plus-circle"></i> Add new Procedure" is displayed.</p>
+                </div>
+                <div class="col">
+                    <p><b>8º:</b> To check Certifications and Extra documents you can click the the Dropdown named "<i class="bi bi-patch-check"></i>&nbsp; Certifications & Other Documentation". 
+                    This will open a new Tab with information about the entities who certified the vehicle and any other extra documents associted.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>9º: </b>For <b>Certification authorities</b> a "Certify" button is displayed.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>10º: </b>For <b>Owners</b>, <b>Restoration entities</b>, and <b>Certification authorities</b> a "<i class="bi bi-plus-circle"></i> Add New Document" button is displayed.</p>
+                </div>
+                <div class="col"></div>
+                <div class="col"></div>
+            </div>
+        </form>
+        <form #editInfo>
+            <i class="bi bi-person corner"></i>
+            <h2>Edit your classic:</h2>
+            <h6>How can I update the information about a particular vehicle?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> To access this page, click the "<i class="bi bi-pencil"></i> Edit Information" button on the Classic Card page. Only the <b>owner</b> of the vehicle has access to the Edit page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> Update all the desired fields. From the basic details, only the VIN/Chassis number is not possible to update.</p>
+                </div>
+                <div class="col">
+                    <p><b>3º:</b> Click the "Update Info" button to update the information.</p>
+                </div>
+            </div>
+        </form>
+        <form #historyInfo>
+            <i class="bi bi-people corner3"></i>
+            <i class="bi bi-wrench-adjustable corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Check a Classic's History:</h2>
+            <h6>How can I check the history of updates of my Vehicle Card?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> To access this page, click the "<i class="bi bi-book"></i> History" button on the Classic Card page. Every user with access to the particular vehicle can access this page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> In this page, you can check the data of all the versions of the classic with the associated Blockchain transaction ID. You can check the basic details and the resto is organized in 4 different Tabs:
+                    "<i class="bi bi-people-fill"></i> Prior Owners", "<i class="bi bi-tools"></i> Restorations", "<i class="bi bi-clipboard-check"></i> Certified By" and "<i class="bi bi-archive"></i> Extra Documents"</p>
+                </div>
+                <div class="col">
+                    <p><b>3º:</b> Every version is organized by date and time when the transaction was performed.</p>
+                </div>
+            </div>
+        </form>
+        <form #accessInfo>
+            <i class="bi bi-person corner"></i>
+            <h2>Check and Update a Classic's Access Permissions:</h2>
+            <h6>How can I grant or revoke access permissions from a specific car to another user?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> To access this page, click the "<i class="bi bi-person-lock"></i> Access Permissions" button on the Classic Card page. Only the <b>owner</b> of the vehicle has access to the Access Permissions page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> In this page, you can check all the users that have access permissions to a specific vehicle, their access level (viewer, modifier or certifier) and when the access was granted.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>3º:</b> It is also possible to access or grant access permissions. For this, you need to provide: if you want to "Grant" or "Revoke" permissions;
+                    the access level (viewer, modifier, certifier); and the user to grant/revoke. All this is auto-filled, you only need to select and then need to click the
+                    "Change permissions" button.</p>
+                </div>
+                <div class="col">
+                    <p><b>4º: </b>Ultimately, you can also transfer the ownership of your classic to another user. This will grant the "Owner" access level to the other user and your
+                    access is completly removed automatically. To do this, you only need to select the user to transfer the classic to, check the box confirming you want to transfer your
+                    vehicle and click the "Update Owner" button.</p>
+                </div>
+            </div>
+        </form>
+        <form #accessHistoryInfo>
+            <i class="bi bi-person corner"></i>
+            <h2>Check a Classic's Access History:</h2>
+            <h6>How can I check all the users that, at some point in time, had access to my classic?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> To access this page, click the "<i class="bi bi-book-half"></i> Access History" button on the Classic Card page. Only the <b>owner</b> of the vehicle has access to the Access History page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> In this page, you can check the data of all the versions of the access permissions with the associated Blockchain transaction ID.
+                    For each version, you can check the owner and the users with viewer, modifier, or certifier permissions, and the date their access was granted.</p>
+                </div>
+                <div class="col">
+                    <p><b>3º: Every version is organized by date and time when the transaction was performed.</b></p>
+                </div>
+            </div>
+        </form>
+        <form #newRestorationInfo>
+            <i class="bi bi-person corner2"></i>
+            <i class="bi bi-wrench-adjustable corner"></i>
+            <h2>Add a new Restoration Step:</h2>
+            <h6>How can I add a new Restoration procedure to a classic?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> To access this page, click the "<i class="bi bi-plus-circle"></i> Add new Procedure" button on the Classic Card page. Only the <b>owner</b> and <b>restoration entities</b> have access to the Add new Restoration page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º: </b>Fill in the title and description fields of the Restoration. If the desired, you can also add photos to associate with that restoration procedure.</p>
+                </div>
+                <div class="col">
+                    <p><b>3º: </b>To finish, you need to click the "Create" button.</p>
+                </div>
+            </div>
+        </form>
+        <form #updateRestorationInfo>
+            <i class="bi bi-person corner2"></i>
+            <i class="bi bi-wrench-adjustable corner"></i>
+            <h2>Update a Restoration Step:</h2>
+            <h6>How can I update a Restoration procedure?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> !First is important to highlight that only the user who originally created the restoration procedure is allowed to update it!</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> To access this page, click the <i class="bi bi-pencil"></i> button on the desired restoration card on the Classic Card page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>3º:</b> Once on the page, you can update the title and description fields, as well as, add more photos to that restoration.</p>
+                </div>
+                <div class="col">
+                    <p><b>4º:</b> Click the "Update Info" button to update the restoration data.</p>
+                </div>
+            </div>
+        </form>
+        <form #addDocumentInfo>
+            <i class="bi bi-people corner3"></i>
+            <i class="bi bi-wrench-adjustable corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Add a new Document:</h2>
+            <h6>How can I add a new document to my classic?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º: </b>To access this page, click the "<i class="bi bi-plus-circle"></i> Add New Document" button on the Classic Card page. Only the <b>owner</b>, <b>restoration entities</b> and <b>certification authorities</b> have access to the Add new Document page.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º: </b>Once on the page, you need to fill the title of the document and add the document. This document can be a file of any type: image, video, PDF or any other.</p>
+                </div>
+                <div class="col">
+                    <p><b>3º:</b> Click the "<i class="bi bi-plus-circle"></i> Add document" button to add the document.</p>
+                </div>
+            </div>
+        </form>
+        <form #createClassicInfo>
+            <i class="bi bi-tools corner2"></i>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Create a classic: <small>[Restoration shops and Certification authorities exclusive]</small></h2>  
+            <h6>As a restoration shop or cerification authority, how can I a new classic to the platform?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If logged in as a restoration shop, you can click the "New Classic" green button in the <a href="http://194.210.120.34:4200/classics" target="_blank">list of classics page</a>.</p>
+                </div>
+                <div class="col margin">
+                    <p><b>2º:</b> This will redirect you to the page where you will have to fill some basic details about the classic, such as make, model, country of manufacture
+                    VIN/chassis number (which can not be editted later), and owner (from a list of registered users).</p>
+                </div>
+                <div class="col margin">
+                    <p><b>3º:</b> Check the box confirming that you want to create the classic and that the VIN/chassis number is correct.</p>
+                </div>
+                <div class="col">
+                    <p><b>4º:</b> Click the "Create Classic" button to create the new classic.</p>
+                </div>
+            </div>
+        </form>
+        <form #restorationClassicsInfo>
+            <i class="bi bi-tools corner"></i>
+            <h2>Get all the classics that have modifier access to: <small>[Restoration shops exclusive]</small></h2>  
+            <h6>As a restoration shop, how can I check all the classics that I have modifier access to?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If logged in as a restoration shop, you can click the "<a href="http://194.210.120.34:4200/classics" target="_blank">Your Classics</a>" button in the Navigation Bar, which is available on top of each page.</p>
+                </div>
+                <div class="col">
+                    <p><b>2º:</b> This will redirect you to the page where a list of classics that have been granted the permission to be modified by you are displayed. 
+                    Some additional details from each vehicle are also displayed. The button to redirect to each Vehicle Card is also displayed.</p>
+                </div>
+            </div>
+        </form>
+        <form #certifierClassicsInfo>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Get all the classics that have certifier access to: <small>[Certification authorities exclusive]</small></h2>  
+            <h6>As a certification authority, how can I check all the classics that I have certifier access to?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If logged in as a certfication authority, you can click the "<a href="http://194.210.120.34:4200/classics" target="_blank">Your Classics</a>" button in the Navigation Bar, which is available on top of each page.</p>
+                </div>
+                <div class="col">
+                    <p><b>2º:</b> This will redirect you to the page where a list of classics that have been granted the permission to be certified by you are displayed. 
+                    Some additional details from each vehicle are also displayed. The button to redirect to each Vehicle Card is also displayed.</p>
+                </div>
+            </div>
+        </form>
+        <form #addCertificationInfo>
+            <i class="bi bi-clipboard-check corner"></i>
+            <h2>Add a New Certification: <small>[Certification authorities exclusive]</small></h2>  
+            <h6>As a certification authority, how can I register a new certification?</h6>
+            <div class="row">
+                <div class="col margin">
+                    <p><b>1º:</b> If logged in as a certfication authority, in the "<i class="bi bi-patch-check"></i> Certifications & Other Documentation" Tab in the Vehicle Card Page,
+                        you will have a "<i class="bi bi-plus-circle"></i> Add Certification" button. Click it.</p>
+                </div>
+                <div class="col">
+                    <p><b>2º:</b> By clicking the button, you will automatically register the specific classic a new certification.</p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

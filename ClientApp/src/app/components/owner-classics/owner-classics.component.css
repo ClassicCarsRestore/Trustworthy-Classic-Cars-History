@@ -1,0 +1,6 @@
+.classics-container {
+  height: 75vh;
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}

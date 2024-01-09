@@ -1,0 +1,47 @@
+<div *ngIf="!transaction" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="transaction">
+    <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="txinfo jumbotron">
+                <h1 style="text-align: center;"><i class="bi bi-link-45deg"></i> Transaction Information</h1>
+                <h6> <strong><i class="bi bi-link"></i> ID</strong>: {{ transaction.txId }}</h6>
+                <h6> <strong><i class="bi bi-calendar-check"></i> Date</strong>: {{ formatDate(transaction.timestamp) }}</h6>
+                <h6><strong><i class="bi bi-person-vcard"></i> Transaction Submitter</strong>:</h6>
+                <div class="row" style="text-align: center;">
+                    <div class="col-md-6">
+                        <span class="clickable-link" (click)="getInfoByEmail(transaction.creator.email)"><strong>Email</strong>: {{transaction.creator.email}}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <p *ngIf="transaction.creator.orgMsp === 'Org1MSP'"><strong>Org</strong>: User</p>
+                        <p *ngIf="transaction.creator.orgMsp === 'Org2MSP'"><strong>Org</strong>: Workshop</p>
+                        <p *ngIf="transaction.creator.orgMsp === 'Org3MSP'"><strong>Org</strong>: Certification</p>
+                    </div>
+                </div>
+                <h6 class="clickh6" (click)="showDetails = !showDetails"><strong><i class="bi bi-arrow-return-right"></i> Function performed</strong>:</h6>
+                <div *ngIf="showDetails">
+                    <p style="text-align: center;"><strong>Function Name</strong>: {{transaction.fx.name}}</p>
+                    <p style="text-align: center;"><strong>Arguments</strong>:</p>
+                    <div *ngFor="let arg of transaction.fx.args">
+                        <p style="word-break: break-all;">{{arg}}</p>
+                    </div>
+                </div>
+                <h6 class="clickh6" (click)="showDetails1 = !showDetails1"><strong><i class="bi bi-arrow-return-left"></i> Function result</strong>:</h6>
+                <div  *ngIf="showDetails1" class="row" style="text-align: center;">
+                    <div class="col-md-6">
+                        <p><strong>Status code</strong>: {{transaction.response.response}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Message</strong>: {{transaction.response.result}}</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>

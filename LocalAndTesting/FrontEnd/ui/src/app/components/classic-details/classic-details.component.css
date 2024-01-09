@@ -1,0 +1,101 @@
+.index-circle {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 30px;
+  height: 30px;
+  background-color: #0d6efd;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 30px;
+  z-index: 1;
+}
+
+.btn-circle {
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  padding: 0;
+  background-color: #f0f0f0; 
+  transition: background-color 0.3s ease; 
+}
+
+.btn-circle i,
+.btn-circle2 i {
+  font-size: 20px;
+}
+
+.btn-circle:hover,
+.btn-circle2:hover {
+  background-color: #e0e0e0; 
+}
+
+
+.btn-circle2 {
+  position: absolute;
+  top: -15px;
+  right: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  padding: 0;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+.mini-cards {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.mini-card {
+  width: calc(33.33% - 10px);
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mini-card img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/*Overwriting bootstrap .btn-info*/
+.btn-info {
+  --bs-btn-color: #fff;
+  --bs-btn-bg :#86b7fe;
+  --bs-btn-border-color :#86b7fe;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-border-color: #9dc2fa;
+  --bs-btn-hover-bg: #9dc2fa;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #86b7fe;
+  --bs-btn-active-border-color: #86b7fe;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #86b7fe;
+  --bs-btn-disabled-border-color: #86b7fe;
+}
+
+
+.clickable-link {
+  text-decoration: underline; 
+  cursor: pointer; 
+}
+
+.clickable-link:hover {
+  text-decoration: none; 
+  color: #86b7fe;
+}

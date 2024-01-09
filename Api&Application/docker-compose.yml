@@ -1,0 +1,49 @@
+version: '3'
+services:
+  ipfs:
+    image: ipfs/go-ipfs
+    restart: always
+    command: ["daemon"]
+    ports:
+     - "4001:4001"
+     - "5001:5001"
+     - "8080:8080"
+    expose:
+      - "4001"
+      - "5001"
+      - "8080"
+    networks:
+      - my_network
+
+  classics-api:
+    build: .
+    restart: always
+    ports:
+      - "8393:8393"
+    expose:
+      - "8393"
+    volumes:
+      - ./org1-wallet:/usr/src/app/org1-wallet
+      - ./org2-wallet:/usr/src/app/org2-wallet
+      - ./org3-wallet:/usr/src/app/org3-wallet
+      - ./network.yaml:/usr/src/app/network.yaml
+    networks:
+      - my_network
+    depends_on:
+      - ipfs
+  
+  classics-ui:
+    build: ../front/ui
+    restart: always
+    ports:
+      - "4200:443"
+    expose:
+      - "4200"
+    networks:
+      - my_network
+    depends_on:
+      - classics-api
+
+networks:
+  my_network:
+    driver: bridge

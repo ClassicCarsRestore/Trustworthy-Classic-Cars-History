@@ -1,15 +1,25 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+Api&Application/org1-wallet/*
+Api&Application/org2-wallet/*
+Api&Application/org3-wallet/*
+Api&Application/.env
+Api&Application/node_modules
+Api&Application/cert
 
-# Test binary, built with `go test -c`
-*.test
+ClientApp/node_modules
+ClientApp/.vscode
+ClientApp/cert
+ClientApp/.angular/cache
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+LocalAndTesting/App&API/org1-wallet/*
+LocalAndTesting/App&API/org2-wallet/*
+LocalAndTesting/App&API/org3-wallet/*
+LocalAndTesting/App&API/.env
+LocalAndTesting/App&API/node_modules
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+LocalAndTesting/FrontEnd/ui/node_modules
+LocalAndTesting/FrontEnd/ui/.vscode
+LocalAndTesting/FrontEnd/ui/.angular/cache
+
+Tests/API/testDocs/*
+Tests/caliper-workspace/node_modules
+Tests/caliper-workspace/caliper.log

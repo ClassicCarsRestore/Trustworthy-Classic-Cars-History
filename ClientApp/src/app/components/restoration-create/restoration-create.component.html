@@ -1,0 +1,31 @@
+<div *ngIf="access !== 'owner' && access !== 'modifier'" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="access === 'owner' || access === 'modifier'">
+    <div class="container">
+        <h1>Creating a new restoration step for: {{classic?.make + " " + classic?.model + " " + classic?.year}}</h1>
+        <form style="padding-top: 25px;">
+            <div class="form-group">
+                <label for="title">Title of the restoration step</label>
+                <input type="text" class="form-control" id="title" value="" required>
+                <small id="titleEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="description">Description of the restoration step</label>
+                <textarea class="form-control" id="description" rows="3" required></textarea>
+                <small id="descriptionEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="file">Photos/Documents to add:</label>
+                <input class="form-control" type="file" id="file" name="file" (change)="onFileSelected($event)" multiple required>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="onSubmit()">Create</button>
+            <div *ngIf="showSpinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only"></span>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,408 @@
+
+name: hlf-network
+version: 1.0.0
+client:
+  organization: ""
+organizations:
+  
+  OrdererMSP:
+    mspid: OrdererMSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      orderer-admin-default:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICVjCCAfygAwIBAgIUJiHdRyD01V6djJ0p3wVBX+c/iFQwCgYIKoZIzj0EAwIw
+            bTELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEO
+            MAwGA1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMzM3WhcNMjQwNzMxMTgyNzAwWjAg
+            MQ4wDAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAARs3AdtQpA9r9OImnRvSRyk+jV3BO8I7AmhHAOIanJl+/K6JbXj
+            rYT6B2tF4qlho3PniRZoO14dzwet0tFqZ+n7o4HGMIHDMA4GA1UdDwEB/wQEAwIH
+            gDAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBQJ7gGZM2308c/WhgJ2hpyLS8MsNDAr
+            BgNVHSMEJDAigCBnlJnmHINVi6EMZA03SKT3loSIZ3yGrF5nf5P5Yj5c8zBXBggq
+            AwQFBgcIAQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9s
+            bG1lbnRJRCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMC
+            A0gAMEUCIQC3vedNbevggD1ScaNXy5wkkGJq4brfCIMGepctjLT4DAIgFr31B69v
+            l8leciPLgzYzryHfR+OzQAB33IjHHP9x1wk=
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgNr50tZNbbLSdZouy
+            Z18mEDFcy7TJOV1pj/ybBWdL15uhRANCAARs3AdtQpA9r9OImnRvSRyk+jV3BO8I
+            7AmhHAOIanJl+/K6JbXjrYT6B2tF4qlho3PniRZoO14dzwet0tFqZ+n7
+            -----END PRIVATE KEY-----
+            
+    peers: []
+    orderers:
+      - ord-node0.default
+      - ord-node1.default
+      - ord-node2.default
+  Org1MSP:
+    mspid: Org1MSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      org1-admin-default:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICUjCCAfmgAwIBAgIUSEMTQBdHzaHpeSzwtbedkGsNU5AwCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNzMxMTgxNjAyWhcNMjQwNzMxMTgyNzAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAARd5Ze0zvJbypJ+VK2Gm6lS2JWd/5o3QPcafFkNNORRykxHrW7CeFJZ
+            TSP7OOz0JNCthOFvhO4hveP7sUbn2cH1o4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBTsjZdh4oCpCjdcL0o5qsQhSohfaDArBgNV
+            HSMEJDAigCBv0z7zp50MBy9sHQA/ir1cm0YCQpb+pwZHQBqQgjwjrDBXBggqAwQF
+            BgcIAQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1l
+            bnRJRCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0cA
+            MEQCIC3Bp3tzUu/ORVZc0c11y28JhS5eZCt0SXUkfNqckEweAiAswNMUzvZz51zg
+            mSsbkgrWPB+YUI04Czim6+uN/yz+6Q==
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgp4LEAGJR/NkbD0/4
+            1tLeCyVyXxhjR1wu+WU2BLtcIDihRANCAARd5Ze0zvJbypJ+VK2Gm6lS2JWd/5o3
+            QPcafFkNNORRykxHrW7CeFJZTSP7OOz0JNCthOFvhO4hveP7sUbn2cH1
+            -----END PRIVATE KEY-----
+            
+    peers:
+      - org1-peer0.default
+      - org1-peer1.default
+    orderers: []
+  Org2MSP:
+    mspid: Org2MSP
+    cryptoPath: /tmp/cryptopath
+    users:
+      org2-admin-default:
+        cert:
+          pem: |
+            -----BEGIN CERTIFICATE-----
+            MIICUzCCAfmgAwIBAgIUXcjjcyy/a3QGz3XEaB/qMZRWcYwwCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMwNzMxMTgyMTU2WhcNMjQwNzMxMTgyNzAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAASwsnx6tJnPsUjsaLko3tg/SGrmXUSgxWHJQ6AIWo7ZPogkpdar9Sgl
+            RrflQPh39pzO7VZ6m17e0CIFw/2vnel9o4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBRAsXq8OL8egTTOkqLnaRbdJa2N6jArBgNV
+            HSMEJDAigCDV/g7dGvFA9YT2D3Fh1CHHCG3KC4CwAIShyMy8nbJvFjBXBggqAwQF
+            BgcIAQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1l
+            bnRJRCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0gA
+            MEUCIQD/Cde/Nf9nmRj0F5//hzCMGIGH+Nexw9qyfXDqVPU1yAIgWjr+5D1FqCW0
+            h2ts0dBYAzEwkzipiKhlfngx1gGGaUE=
+            -----END CERTIFICATE-----
+            
+        key:
+          pem: |
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgwti3os4rlcxM3e/F
+            0t2wODDDRyci4kQNZV5Z1rkJH+ShRANCAASwsnx6tJnPsUjsaLko3tg/SGrmXUSg
+            xWHJQ6AIWo7ZPogkpdar9SglRrflQPh39pzO7VZ6m17e0CIFw/2vnel9
+            -----END PRIVATE KEY-----
+            
+    peers:
+      - org2-peer0.default
+      - org2-peer1.default
+    orderers: []
+orderers:
+  ord-node0.default:
+
+    url: grpcs://orderer0-ord.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRjCCAeygAwIBAgIRAPwphfIe1oy70NlaHnOxEmIwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMzM3WhcNMzMwODAxMTgyMzM3WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABC8yDZDKBL8ufBxZ
+        ygPpsHlq8TGgvHQeNZ68jcc4ijyhygpHAQ0WsFF14tRvBG/b1OU22JNlBZRtjLEW
+        B/FnrjujbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgZ5SZ5hyDVYuhDGQN
+        N0ik95aEiGd8hqxeZ3+T+WI+XPMwCgYIKoZIzj0EAwIDSAAwRQIhAKsaaUHmyAAo
+        VCbcAIxfF3iuMLeZM5gcxITNDb83uu6AAiAIzfhRVXllJ2rNWAMLR4F8pomD2SFH
+        +9pqJb4/EVwFeQ==
+        -----END CERTIFICATE-----
+        
+  ord-node1.default:
+
+    url: grpcs://orderer1-ord.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRjCCAeygAwIBAgIRAPwphfIe1oy70NlaHnOxEmIwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMzM3WhcNMzMwODAxMTgyMzM3WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABC8yDZDKBL8ufBxZ
+        ygPpsHlq8TGgvHQeNZ68jcc4ijyhygpHAQ0WsFF14tRvBG/b1OU22JNlBZRtjLEW
+        B/FnrjujbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgZ5SZ5hyDVYuhDGQN
+        N0ik95aEiGd8hqxeZ3+T+WI+XPMwCgYIKoZIzj0EAwIDSAAwRQIhAKsaaUHmyAAo
+        VCbcAIxfF3iuMLeZM5gcxITNDb83uu6AAiAIzfhRVXllJ2rNWAMLR4F8pomD2SFH
+        +9pqJb4/EVwFeQ==
+        -----END CERTIFICATE-----
+        
+  ord-node2.default:
+
+    url: grpcs://orderer2-ord.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRjCCAeygAwIBAgIRAPwphfIe1oy70NlaHnOxEmIwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMzM3WhcNMzMwODAxMTgyMzM3WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABC8yDZDKBL8ufBxZ
+        ygPpsHlq8TGgvHQeNZ68jcc4ijyhygpHAQ0WsFF14tRvBG/b1OU22JNlBZRtjLEW
+        B/FnrjujbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgZ5SZ5hyDVYuhDGQN
+        N0ik95aEiGd8hqxeZ3+T+WI+XPMwCgYIKoZIzj0EAwIDSAAwRQIhAKsaaUHmyAAo
+        VCbcAIxfF3iuMLeZM5gcxITNDb83uu6AAiAIzfhRVXllJ2rNWAMLR4F8pomD2SFH
+        +9pqJb4/EVwFeQ==
+        -----END CERTIFICATE-----
+        
+peers:
+  org1-peer0.default:
+
+    url: grpcs://peer0-org1.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRTCCAeygAwIBAgIRAP3vi4OJdAT6KLkr9eWLjlUwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgxNjAyWhcNMzMwODAxMTgxNjAyWjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIb8GnCOK6eNF1BK
+        RlKaAAsBYwxcfJz8L64RgA+xso3vrJiZEH/vFb5lJt9+trsR4VhxpEGx9fVmRNLq
+        DORIb8GjbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgKzdXPcEKx1A4jClz
+        q+2FPrRIOWhv6nNqDFCOHT9iGs4wCgYIKoZIzj0EAwIDRwAwRAIgD9Nvxwj6KJ+a
+        De+Ay5bE1GVZtCy3O00lDXJOV4u6W8sCIE7W4o7WeH0JPNAZQqo7Q25Z4ffNFZjK
+        K2drZHXhuhuE
+        -----END CERTIFICATE-----
+        
+  org1-peer1.default:
+
+    url: grpcs://peer1-org1.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRTCCAeygAwIBAgIRAP3vi4OJdAT6KLkr9eWLjlUwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgxNjAyWhcNMzMwODAxMTgxNjAyWjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIb8GnCOK6eNF1BK
+        RlKaAAsBYwxcfJz8L64RgA+xso3vrJiZEH/vFb5lJt9+trsR4VhxpEGx9fVmRNLq
+        DORIb8GjbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgKzdXPcEKx1A4jClz
+        q+2FPrRIOWhv6nNqDFCOHT9iGs4wCgYIKoZIzj0EAwIDRwAwRAIgD9Nvxwj6KJ+a
+        De+Ay5bE1GVZtCy3O00lDXJOV4u6W8sCIE7W4o7WeH0JPNAZQqo7Q25Z4ffNFZjK
+        K2drZHXhuhuE
+        -----END CERTIFICATE-----
+        
+  org2-peer0.default:
+
+    url: grpcs://peer0-org2.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRzCCAeygAwIBAgIRAOsjAbpoDneJlnRq2DUS2gEwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMTU2WhcNMzMwODAxMTgyMTU2WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJCjuCdLVI31bUrk
+        twKbB3paI2AyD234r2wB985N021gtU+QbMquRJBWVLqiCqQyr+Rej27V1NDqv7/f
+        OFjKMDGjbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgBFAZGWafbo0IfZLl
+        vwdblyezio8J+n0/+fMH8GQBG+0wCgYIKoZIzj0EAwIDSQAwRgIhAOEq6V0w1EY+
+        LMZatS6FYvROStpQKjMXQ2iLtGir7pcKAiEAwOREPWgwI6pqKpDYYX6ZWbXPUr/S
+        NZ2TB89n+H6DocQ=
+        -----END CERTIFICATE-----
+        
+  org2-peer1.default:
+
+    url: grpcs://peer1-org2.localho.st:443
+
+    grpcOptions:
+      allow-insecure: false
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICRzCCAeygAwIBAgIRAOsjAbpoDneJlnRq2DUS2gEwCgYIKoZIzj0EAwIwbTEL
+        MAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGljYW50
+        ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEOMAwG
+        A1UEAxMFdGxzY2EwHhcNMjMwNzMxMTgyMTU2WhcNMzMwODAxMTgyMTU2WjBtMQsw
+        CQYDVQQGEwJFUzERMA8GA1UEBxMIQWxpY2FudGUxETAPBgNVBAkTCEFsaWNhbnRl
+        MRkwFwYDVQQKExBLdW5nIEZ1IFNvZnR3YXJlMQ0wCwYDVQQLEwRUZWNoMQ4wDAYD
+        VQQDEwV0bHNjYTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJCjuCdLVI31bUrk
+        twKbB3paI2AyD234r2wB985N021gtU+QbMquRJBWVLqiCqQyr+Rej27V1NDqv7/f
+        OFjKMDGjbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgBFAZGWafbo0IfZLl
+        vwdblyezio8J+n0/+fMH8GQBG+0wCgYIKoZIzj0EAwIDSQAwRgIhAOEq6V0w1EY+
+        LMZatS6FYvROStpQKjMXQ2iLtGir7pcKAiEAwOREPWgwI6pqKpDYYX6ZWbXPUr/S
+        NZ2TB89n+H6DocQ=
+        -----END CERTIFICATE-----
+        
+certificateAuthorities:
+  
+  ord-ca.default:
+
+    url: https://ord-ca.localho.st:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: enrollpw
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICWjCCAf+gAwIBAgIRAOcwOxuNJQhU6zcRHjxIWt8wCgYIKoZIzj0EAwIwUjET
+            MBEGA1UEBhMKQ2FsaWZvcm5pYTEJMAcGA1UEBxMAMQkwBwYDVQQJEwAxFDASBgNV
+            BAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMwHhcNMjMwNzMxMTgyMzM3
+            WhcNMzMwODAxMTgyMzM3WjBSMRMwEQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQH
+            EwAxCTAHBgNVBAkTADEUMBIGA1UEChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZh
+            YnJpYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABKWEdsmOknM582k3T5GNl6sY
+            XACjcFnsGAEqJqmAjb2ktOnaQRqw7/4lDRGVcRI/fCfp8OUwlAuuld+oTAxqaAOj
+            gbUwgbIwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEF
+            BQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCBACe7z+sdYs06gD8iA+vW3
+            4UPamVPr2jDgi72RzmVwkDBFBgNVHREEPjA8gglsb2NhbGhvc3SCBm9yZC1jYYIO
+            b3JkLWNhLmRlZmF1bHSCEW9yZC1jYS5sb2NhbGhvLnN0hwR/AAABMAoGCCqGSM49
+            BAMCA0kAMEYCIQCJN32Yoi3+b/GdsT3GpToQ/LRZBO/6wgHb3cMnYAxzGQIhAKWh
+            cUIG5+rKwlyNxbnxhk1ODU+Ui/uw5F1HIJl9Y4GN
+            -----END CERTIFICATE-----
+            
+  
+  org1-ca.default:
+
+    url: https://org1-ca.localho.st:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: enrollpw
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICXDCCAgKgAwIBAgIRANeyj8KRRhWd3Q3fu2QIzpAwCgYIKoZIzj0EAwIwUjET
+            MBEGA1UEBhMKQ2FsaWZvcm5pYTEJMAcGA1UEBxMAMQkwBwYDVQQJEwAxFDASBgNV
+            BAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMwHhcNMjMwNzMxMTgxNjAy
+            WhcNMzMwODAxMTgxNjAyWjBSMRMwEQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQH
+            EwAxCTAHBgNVBAkTADEUMBIGA1UEChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZh
+            YnJpYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABH99yOfRimuElA7sjU6n+/af
+            jV5Rj1t/WDsV4qdqWcWN8k6mapzkheisBkv5/svXa0mrsdGnC9js2T64pzucmT2j
+            gbgwgbUwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEF
+            BQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCCUoK9hGTiYu/Ucfh62AmNw
+            +CUxOhyNOHmn7GwX+iBwkTBIBgNVHREEQTA/gglsb2NhbGhvc3SCB29yZzEtY2GC
+            D29yZzEtY2EuZGVmYXVsdIISb3JnMS1jYS5sb2NhbGhvLnN0hwR/AAABMAoGCCqG
+            SM49BAMCA0gAMEUCIEpdQ+r3Ilw5S5vzVI5AiIsq8gnfncwd8aPteJZFSsPeAiEA
+            yRlwq9VtYvIIXpzSadZpS8bG0cWQVjm5fSyV10oTsgc=
+            -----END CERTIFICATE-----
+            
+  
+  org2-ca.default:
+
+    url: https://org2-ca.localho.st:443
+
+
+    registrar:
+        enrollId: enroll
+        enrollSecret: enrollpw
+
+    caName: ca
+    tlsCACerts:
+      pem: 
+       - |
+            -----BEGIN CERTIFICATE-----
+            MIICXDCCAgKgAwIBAgIRALzBHSIxfdra47cbO3s/vbkwCgYIKoZIzj0EAwIwUjET
+            MBEGA1UEBhMKQ2FsaWZvcm5pYTEJMAcGA1UEBxMAMQkwBwYDVQQJEwAxFDASBgNV
+            BAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMwHhcNMjMwNzMxMTgyMTU2
+            WhcNMzMwODAxMTgyMTU2WjBSMRMwEQYDVQQGEwpDYWxpZm9ybmlhMQkwBwYDVQQH
+            EwAxCTAHBgNVBAkTADEUMBIGA1UEChMLSHlwZXJsZWRnZXIxDzANBgNVBAsTBkZh
+            YnJpYzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOMYZbs4DT8obOnooAPwZf9v
+            hWK2kcQUoYULAGrd7S2hYgmJcbN29bLfiFX+S/ioweBzzkAJJrccRCG/tDSLxuqj
+            gbgwgbUwDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEF
+            BQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCDL/oL3+kMh+sRjQwacdqrI
+            golXzA5rd6XXflkvN1rQQjBIBgNVHREEQTA/gglsb2NhbGhvc3SCB29yZzItY2GC
+            D29yZzItY2EuZGVmYXVsdIISb3JnMi1jYS5sb2NhbGhvLnN0hwR/AAABMAoGCCqG
+            SM49BAMCA0gAMEUCIQCY1lEHdKvbOyyb9PurFi871C972KouZuGaQOQV8NGRhQIg
+            AkdjZv/2W20T0GN6ufIAZc+tkUogYDrzaTWaXzIS6Ok=
+            -----END CERTIFICATE-----
+            
+
+
+channels:
+  mychannel:
+    orderers:
+      - ord-node0.default
+      - ord-node1.default
+      - ord-node2.default
+    peers:
+       org1-peer0.default:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org1-peer1.default:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2-peer0.default:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+       org2-peer1.default:
+        discover: true
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+

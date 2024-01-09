@@ -1,0 +1,109 @@
+<div *ngIf="!classicHistory" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="classicHistory">
+    <div class="container">
+        <h1>Checking History of: {{ classic?.make + " " + classic?.model + " " + classic?.year }}</h1>
+        <h3>Number of Updates: {{classicHistory.counter}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Timeline</h4>
+                        <div id="content">
+                            <ul class="timeline">
+                                <li class="event" *ngFor="let txn of txns; let i = index" [attr.data-date]="formatDate(txn.timestamp)">
+                                    <h3>Transaction ID: {{ txn.txn }}</h3>
+                                    <p>
+                                        <i class="bi bi-car-front-fill"></i> {{txn.value.make + " " + txn.value.model + " " + txn.value.year}}
+                                        <i class="bi bi-geo-alt-fill"></i> {{txn.value.country}}
+                                        <span class="clickable-link" (click)="getInfoByEmail(txn.value.ownerEmail)"><i class="bi bi-person-fill"></i> {{txn.value.ownerEmail}}</span>
+                                    </p>
+                                    <p>
+                                        <i class="bi bi-card-checklist"></i> {{txn.value.licencePlate}}
+                                        <i class="bi bi-file-earmark-bar-graph-fill"></i> {{txn.value.chassisNo}}
+                                        <i class="bi bi-speedometer"></i> {{txn.value.engineNo}}
+                                    </p>
+                                    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+                                        <li [ngbNavItem]="1">
+                                            <button ngbNavLink><i class="bi bi-people-fill"></i> Prior Owners</button>
+                                            <ng-template ngbNavContent>
+                                                <div *ngIf="txn.value.priorOwners && txn.value.priorOwners.length > 0">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item clickable-link" (click)="getInfoByEmail(prior)" *ngFor="let prior of txn.value.priorOwners">{{ prior }}</li>
+                                                    </ul>
+                                                </div>
+                                                <div *ngIf="txn.value.priorOwners && txn.value.priorOwners.length == 0">
+                                                    <p>This vehicle has no prior owners.</p>
+                                                </div>
+                                            </ng-template>
+                                        </li>
+                                        <li [ngbNavItem]="2">
+                                            <button ngbNavLink><i class="bi bi-tools"></i> Restorations</button>
+                                            <ng-template ngbNavContent>
+                                                <div *ngIf="txn.value.restorations && txn.value.restorations.length == 0">
+                                                    <p>This vehicle has no restoration procedures yet.</p>
+                                                    </div>
+                                                    <div class="row" *ngIf="txn.value.restorations && txn.value.restorations.length > 0">
+                                                    <ng-container *ngFor="let restoration of txn.value.restorations; let j = index">
+                                                        <div class="col-md-4 mb-4">
+                                                            <div class="card">
+                                                                <div class="card-body">
+                                                                <div class="index-circle">{{j+1}}</div>
+                                                                <button (click)="showPhotos(i, j)" class="btn btn-link btn-circle ">
+                                                                    <i class="bi bi-images"></i></button>
+                                                                <h5 class="card-title">{{j+1}}º {{ restoration.title }}</h5>
+                                                                <p class="card-text">{{ restoration.description }}</p>
+                                                                <div class="mini-cards" *ngIf="showPhotosMatrix[i][j]">
+                                                                    <div class="mini-card" *ngFor="let photo of restoration.photosIds">
+                                                                    <a href="{{ photo }}"><img [src]="photo" class="card-img-top" alt="Restoration Photo" (error)="handleImageError($event)"></a>
+                                                                    </div>
+                                                                </div>
+                                                                <p class="card-text clickable-link" (click)="getInfoByEmail(restoration.madeBy)"><small class="text-muted">Made by: {{ restoration.madeBy }}</small></p>
+                                                                <p class="card-text"><small class="text-muted">Date: {{ formatDate(restoration.when) }}</small></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                    </div>
+                                            </ng-template>
+                                        </li>
+                                        <li [ngbNavItem]="3">
+                                            <button ngbNavLink><i class="bi bi-clipboard-check"></i> Certified By</button>
+                                            <ng-template ngbNavContent>
+                                                <div *ngIf="txn.value.certifications && txn.value.certifications.length > 0">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item clickable-link" (click)="getInfoByEmail(cert)" *ngFor="let cert of txn.value.certifications">{{ cert }}</li>
+                                                    </ul>
+                                                </div>
+                                                <div *ngIf="txn.value.certifications && txn.value.certifications.length == 0">
+                                                    <p>This classic was not yet certified by any certification authority.</p>
+                                                </div>
+                                            </ng-template>
+                                        </li>
+                                        <li [ngbNavItem]="4">
+                                            <button ngbNavLink><i class="bi bi-archive"></i> Extra Documents</button>
+                                            <ng-template ngbNavContent>
+                                                <div *ngFor="let entry of getDocuments(txn.value.documents)">
+                                                    <p><strong>{{ entry[0] }}: </strong></p>
+                                                    <a href="{{ entry[1] }}">{{ entry[1] }}</a>
+                                                </div>
+                                                <div *ngIf="getDocuments(txn.value.documents).length == 0">
+                                                    <p>This classic was no extra documents associated.</p>
+                                                </div>
+                                            </ng-template>
+                                        </li>
+                                    </ul>
+                                    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

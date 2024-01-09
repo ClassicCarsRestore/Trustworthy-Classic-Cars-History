@@ -1,0 +1,53 @@
+<div class="register jumbotron center-block col">
+    <h1>Register</h1>
+    <form role="form" (submit)="register(email.value, password.value, repeatPass.value, firstname.value, surname.value)">
+        <div class="form-group">
+            <label for="firstname">First Name / Type of Entity</label>
+            <input type="text" #firstname class="form-control" id="firstname" placeholder="e.g., John / Restoration Shop">
+            <small id="firstnameEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="surname">Surname / Name of the Company</label>
+            <input type="text" #surname class="form-control" id="surname" placeholder="e.g., Alex / Raimundo Branco">
+            <small id="surnameEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <select class="form-select" name="country" id="country">
+                <option value="" disabled selected>Select Country</option>
+                <option *ngFor="let country of countries" [value]="country.name">{{country.name}}</option>
+           </select>
+           <small id="countryEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" #email class="form-control" id="email" placeholder="Email">
+            <small id="emailEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" #password class="form-control" id="password" placeholder="Password">
+            <small id="passwordEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="repeatPass">Password</label>
+            <input type="password" #repeatPass class="form-control" id="repeatPass" placeholder="Repeat Password">
+            <small id="repeatPassEmpty" class="form-text" style="color:red"></small>
+        </div>
+        <div class="form-group">
+            <label for="org">Organization</label>
+            <select class="form-select" id="Organization">
+                <option value="Org1" selected>User</option>
+                <option value="Org2">Workshop</option>
+                <option value="Org3">Certification</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-check-label" for="confirmCheckbox">
+              <input type="checkbox" class="form-check-input" id="confirmCheckbox" name="confirmCheckbox" [(ngModel)]="isConfirmed"/>
+              By clicking this box, I confirm that all my details are correct since they cannot be changed later.
+            </label>
+          </div>
+        <button type="submit" class="btn btn-primary w-100 py-2" [disabled]="!isConfirmed" >Register</button>
+    </form>
+</div>

@@ -1,0 +1,17 @@
+test:
+    name: basic-contract-benchmark
+    description: test benchmark
+    workers:
+      number: 2
+    rounds:
+      - label: readAsset
+        description: Read asset benchmark
+        txDuration: 5
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 100
+        workload:
+          module: workload/readAsset.js
+          arguments:
+            contractId: classiccars

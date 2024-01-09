@@ -1,0 +1,36 @@
+<div *ngIf="!restoration" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="restoration">
+    <div class="container">
+        <h1>Editing Restoration with ID: {{ this.restoration.id }}</h1>
+        <form style="padding-top: 25px;">
+            <div class="form-group">
+                <label for="id">Id of the restoration step</label>
+                <input type="text" class="form-control" id="id" value="{{ this.restoration.id }}" disabled>
+            </div>
+            <div class="form-group">
+                <label for="title">Title of the restoration step</label>
+                <input type="title" class="form-control" id="title" value="{{ this.restoration.title }}" required>
+                <small id="titleEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="description">Description of the restoration step</label>
+                <textarea class="form-control" id="description" rows="3" value="{{ this.restoration.description }}" required></textarea>
+                <small id="descriptionEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <div class="form-group">
+                <label for="addPhotos"> Add More Photos/Documents</label>
+                <input class="form-control" type="file" id="file" name="file" (change)="onFileSelected($event)" multiple required>
+                <small id="photosEmpty" class="form-text" style="color:red"></small>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="onSubmitForm()">Update Info</button>
+            <div *ngIf="showSpinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only"></span>
+            </div> 
+        </form>
+    </div>
+</div>

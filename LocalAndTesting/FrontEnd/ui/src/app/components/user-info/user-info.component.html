@@ -1,0 +1,16 @@
+<div *ngIf="!user" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="user">
+    <div class="userinfo jumbotron center-block col">
+        <h1 style="text-align: center; padding: 2%;"><i class="bi bi-person"></i> {{this.user.firstname + " " + this.user.surname}}</h1>
+        <p><strong> <i class="bi bi-person-vcard"></i> First Name / Type of Entity</strong>: {{this.user.firstname}}</p>
+        <p><strong> <i class="bi bi-postcard"></i> Surname / Name of the Company</strong>: {{this.user.surname}}</p>
+        <p><strong> <i class="bi bi-geo-alt"></i> Country</strong>: {{this.user.country}}</p>
+        <p><strong> <i class="bi bi-envelope"></i> Email</strong>: {{this.user.email}}</p>
+        <p><strong> <i class="bi bi-person-workspace"></i> Role</strong>: {{this.user.role}}</p>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+.container {
+  /*width: 80%;*/
+  padding-top: 30px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+#infoAccessForm {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+#changeAccess {
+  background-color: #a9cef0c4;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+#changeOwnerForm {
+  background-color: #f0baa9c4;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.clickable-link {
+  text-decoration: underline; 
+  cursor: pointer; 
+}
+
+.clickable-link:hover {
+  text-decoration: none; 
+  color: #86b7fe;
+}

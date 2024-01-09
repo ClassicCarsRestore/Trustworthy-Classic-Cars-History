@@ -1,0 +1,1147 @@
+openapi: 3.0.0
+info:
+  title: Classic cars REST API for blockchain system
+  description: Classic cars blockchain REST API
+  version: 1.0.0
+paths:
+  /api/Users:
+    post:
+      tags:
+        - User
+      summary: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterInput'
+      responses:
+        '200':
+          description: Success - User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterUserResponse'
+        '400':
+          description: Bad request
+        '409':
+          description: Conflict
+  /api/Users/Login:
+    post:
+      tags:
+        - User
+      summary: Login a user to the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: Success - User logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginUserResponse'
+        '400':
+          description:  Bad request
+        '404':
+          description: User not previsouly registered
+  /api/Users/GetAll:
+    get:
+      tags:
+        - User
+      summary: Gets the email, system's role. first name and surname of all users registered in the system
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllUsersResponse'
+        '400':
+          description:  Bad request
+  /api/Users/Get/{email}:
+    get:
+      tags:
+        - User
+      summary: Gets the info about a specific user
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+            default: user1@example.com
+          description: The desired email
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUsersResponse'
+        '400':
+          description:  Bad request
+  /api/Classics/GetAll:
+    get:
+      tags:
+        - Classics
+      summary: (DEVELOPMENT PURPOSES ONLY) Gets all the classics in the system
+      responses:
+        200:
+          description: Success on request
+  /api/Classics/Create:
+    post:
+      tags:
+        - Classics
+      summary: Adds a new classic to the system (only available to modifiers and certifiers)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassicInput'
+      responses:
+        '200':
+          description: Success - Classic Added to the system
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: Classic with chassis number X was added successfully!
+        '400':
+          description: Bad request
+        '409':
+          description: Conflict - Classic already registered
+  /api/Classics/Get/{chassisNo}:
+    get:
+      tags:
+        - Classics
+      summary: Gets a classic
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetClassicResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/Update/{chassisNo}:
+    put:
+      tags:
+        - Classics
+      summary: Updates the technical details of a classic, excluding the chassis number (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                make:
+                  type: string
+                  default: Ferrari
+                model: 
+                  type: string
+                  default: Dino
+                year:
+                  type: integer
+                  default: 1970
+                licencePlate:
+                  type: string
+                  default: "AB12CD"
+                country:
+                  type: string
+                  default: Spain
+                engineNo:
+                  type: string
+                  default: ABC987XYZ
+      responses:
+        '200':
+          description: Success - Classic Details updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: The car with chassis number X was updated sucessfully.
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/UpdateEmail/{chassisNo}/{newEmail}:
+    put:
+      tags:
+        - Classics
+      summary: Update classic's email (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+        - in: path
+          name: newEmail
+          required: true
+          schema:
+            type: string
+            default: user2org1@gmail.com
+          description: The email of the new onwer
+      responses:
+        '200':
+          description: Success - Classic's ownership changed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: The email of the classic with chassis number X was updated successfully!
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/History/{chassisNo}:
+    get:
+      tags:
+        - Classics
+      summary: Gets the History of a classic 
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetHistoryResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/GetByOwner:
+    get:
+      tags:
+        - Classics
+      summary: Gets the classics owned by the user making the request
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: '#/components/schemas/GetClassicResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/GetByModifier:
+    get:
+      tags:
+        - Classics
+      summary: Gets the classics a workshop/modifier user has access to
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: '#/components/schemas/GetClassicResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/GetByCertifier:
+    get:
+      tags:
+        - Classics
+      summary: Gets the classics a certifier entity user has access to
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: '#/components/schemas/GetClassicResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Restorations/Create/{chassisNo}:
+    post:
+      tags:
+        - Restorations
+      summary: Add a new restoration procedure
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestorationInput'
+      responses:
+        '200':
+          description: Success - Restoration procedure added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: The car with chassis number XYZ123ABC was updated with a new restoration procedure.
+                  stepId:
+                    type: string
+                    default: XYZ123ABC_step_0
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Restorations/Get/{chassisNo}/{stepId}:
+    get:
+      tags:
+        - Restorations
+      summary: Gets the info of a specific restoration step
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+        - in: path
+          name: stepId
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC_step_0
+          description: The id of the restoration step
+      responses:
+        '200':
+          description: Success - Gets the restoration step
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    default: XYZ_step_0
+                  title:
+                    type: string
+                    default: Title of procedure
+                  description:
+                    type: string
+                    default: Description of procedure
+                  photosIds:
+                    type: array
+                    items: 
+                      type: string
+                      default: IPFS photoIDs/documentsIds
+                  madeBy:
+                    type: string
+                    default: "shop1@example.com"
+                  when:
+                    type: string
+                    default: "2023-08-19T16:32:31.459Z"
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found (The classic or the step)
+  /api/Restorations/UpdateAndPhotos/{chassisNo}:
+    put:
+      tags:
+        - Restorations
+      summary: Updates the title, description and photos/documents associated with a specific restoration step
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                stepId:
+                  type: string
+                  default: ABCXYZ_step_0
+                newTitle: 
+                  type: string
+                  default: New title
+                newDescription:
+                  type: string
+                  default: New description
+                files:
+                  type: array
+                  items: 
+                    type: string
+                    default: IPFS photo/document
+      responses:
+        '200':
+          description: Success - Updates the restoration step
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found (The classic or the step)
+  /api/Restorations/Update/{chassisNo}:
+    put:
+      tags:
+        - Restorations
+      summary: Updates the title and/or description of a specific restoration step
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                stepId:
+                  type: string
+                  default: ABCXYZ_step_0
+                newTitle: 
+                  type: string
+                  default: New title
+                newDescription:
+                  type: string
+                  default: New description
+      responses:
+        '200':
+          description: Success - Updates the restoration step
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found (The classic or the step)
+  /api/Restorations/Update/{chassisNo}/Photos:
+    put:
+      tags:
+        - Restorations
+      summary: Updates the photos/documents associated with a specific restoration step
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                stepId:
+                  type: string
+                  default: ABCXYZ_step_0
+                files:
+                  type: array
+                  items: 
+                    type: string
+                    default: IPFS photo/document
+      responses:
+        '200':
+          description: Success - Updates the restoration step
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found (The classic or the step)
+  /api/Access/Get/{chassisNo}:
+    get:
+      tags:
+        - Access
+      summary: Gets the access info of a classic (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccessResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Access/Give/{chassisNo}:
+    put:
+      tags:
+        - Access
+      summary: Gives the access info of a classic to another user (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessInput'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: Classic's access permissions were updated!
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Access/Revoke/{chassisNo}:
+    put:
+      tags:
+        - Access
+      summary: Revokes the access info of a classic to a user (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessInput'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: Classic's access permissions were revoked!
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/AddDocument/{chassisNo}:
+    put:
+      tags:
+        - Classics
+      summary: Adds a document to a classic
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  nullable: true
+            encoding:
+              files:
+                style: form
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  default: Name of the document
+      responses:
+        '200':
+          description: Success - Document added succesfully
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Classics/Certify/{chassisNo}:
+    put:
+      tags:
+        - Classics
+      summary: Logged user with certification authorization certifies a classic
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                    default: true
+                  message:
+                    type: string
+                    default: Classic was certified!
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Access/CheckLevel/{chassisNo}:
+    get:
+      tags:
+        - Access
+      summary: Gets level of access the user making the request has on the classic
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    default: owner/viewer/modifier/certifier
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Access/History/{chassisNo}:
+    get:
+      tags:
+        - Access
+      summary: Gets history of the authorizations (owner only)
+      parameters:
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessHistoryResponse'
+        '400':
+          description: Bad Request
+        '403':
+          description: Not Authorized
+        '404':
+          description: Not Found
+  /api/Transaction/{chassisNo}/{txId}:
+    get:
+      tags:
+       - Transaction
+      summary: Gets the Transaction info given a transaction id (only users with view permisson can perform)
+      parameters: 
+        - in: path
+          name: chassisNo
+          required: true
+          schema:
+            type: string
+            default: XYZ123ABC
+          description: The classic's chassis number
+        - in: path
+          name: txId
+          required: true
+          schema:
+            type: string
+            default: 1a1b98465ad40faf134c48c858c76820f0e341de5fed6a60e8f52c98440ffdab
+          description: The Transaction ID
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  txId:
+                    type: string
+                    default: 1a1b98465ad40faf134c48c858c76820f0e341de5fed6a60e8f52c98440ffdab
+                  timestamp:
+                    type: string
+                    default: 2023-10-03T18:47:47.857Z
+                  creator:
+                    type: object
+                    properties:
+                      email: 
+                        type: string
+                        default: user@example.com
+                      orgMsp:
+                        type: string
+                        default: org1
+                  function:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        default: CreateRestorationStep
+                      args:
+                        type: array
+                        items:
+                          type: string
+                  response:
+                    type: object
+                    properties:
+                      response:
+                        type: integer
+                        default: 200
+                      result:
+                        type: string
+                        default: "Success message from response of original transaction"
+                          
+                    
+components:
+  securitySchemes: 
+    bearerAuth: 
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+  schemas:
+    UserInput:
+      type: object
+      required:
+        - email
+        - password
+        - orgname
+      properties:
+        email:
+          type: string
+          default: user1org1@example.com
+        password:
+          type: string
+          default: password123
+        orgname:
+          type: string
+          default: Org1
+    UserRegisterInput:
+      type: object
+      required:
+        - email
+        - password
+        - orgname
+        - firstname
+        - surname
+        - country
+      properties:
+        email:
+          type: string
+          default: user1org1@example.com
+        password:
+          type: string
+          default: password123
+        orgname:
+          type: string
+          default: Org1
+        firstname:
+          type: string
+          default: John
+        surname:
+          type: string
+          default: Doe
+        country:
+          type: string
+          default: France
+    RegisterUserResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          default: user1org1@example.com
+        success:
+          type: string
+          default: true
+    LoginUserResponse:
+      type: object
+      properties:
+        sucess:
+          type: string
+          default: true
+        message:
+          type: object
+          properties:
+            email:
+              type: string
+              default: user1org1@example.com
+            token:
+              type: string
+              default: BearerJWT
+            org:
+              type: string
+              default: Org1
+    GetAllUsersResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          email:
+            type: string
+            default: user1org1@gmail.com
+          role:
+            type: string
+            default: client
+        example:
+          - email: user1org1@gmail.com
+            role: client
+            firstname: John
+            surname: Doe
+          - email: user2org2@gmail.com
+            role: modifier
+            firstname: Alex
+            surname: Doe
+          - email: user3org3@gmail.com
+            role: certifier
+            firstname: Ana
+            surname: Doe
+    GetUsersResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          default: user1org1@gmail.com
+        role:
+          type: string
+          default: client
+        firstname:
+          type: string
+          default: John
+        surname:
+          type: string
+          default: Doe
+    CreateClassicInput:
+      type: object
+      properties:
+        make:
+          type: string
+          default: Ferrari
+        model:
+          type: string
+          default: Dino
+        year:
+          type: integer
+          default: 1970
+        licencePlate:
+          type: string
+          default: "AB12CD"
+        country:
+          type: string
+          default: Spain
+        chassisNo:
+          type: string
+          default: XYZ123ABC
+        engineNo:
+          type: string
+          default: ABC987XYZ
+        onwerEmail:
+          type: string
+          default: user1org1@example.com
+    RestorationInput:
+      type: object
+      properties:
+        title:
+          type: string
+          default: Title of procedure
+        description:
+          type: string
+          default: Description of procedure
+        files:
+          type: array
+          items: 
+            type: string
+            default: IPFS photo/document
+    GetClassicResponse:
+      type: object
+      properties:
+        make:
+          type: string
+          default: Ferrari
+        model:
+          type: string
+          default: Dino
+        year:
+          type: integer
+          default: 1970
+        licencePlate:
+          type: string
+          default: "AB12CD"
+        country:
+          type: string
+          default: Spain
+        chassisNo:
+          type: string
+          default: XYZ123ABC
+        engineNo:
+          type: string
+          default: ABC987XYZ
+        onwerEmail:
+          type: string
+          default: user1org1@example.com
+        priorOwners:
+          type: array
+          items:
+            type: string
+            default: Other owners
+        restorations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                default: XYZ_step_0
+              title:
+                type: string
+                default: Title of procedure
+              description:
+                type: string
+                default: Description of procedure
+              photosIds:
+                type: array
+                items: 
+                  type: string
+                  default: IPFS photoIDs
+              madeBy:
+                type: string
+                default: "shop1@example.com"
+        certifications:
+          type: array
+          items:
+            type: string
+            default: "certifier1@example.com"
+        documents:
+          type: object
+          properties: 
+            title: 
+              type: string
+              default: Document IPFS ID
+    GetHistoryResponse:
+      type: object
+      properties:
+        counter:
+          type: integer
+          default: 1
+        txns:
+          type: array
+          items:
+            type: object
+            properties:
+              txn:
+                type: string
+                default: 404c8a33a38e7de54098d0352cf803189fdcba91c59939ca98e51aa5ab6ad95c
+              timestamp: 
+                type: string
+                default: 2023-08-19T16:32:31.459Z
+              value:
+                $ref: '#/components/schemas/GetClassicResponse'
+    GetAccessResponse:
+      type: object
+      properties:
+        ownerEmail:
+          type: string
+          default: user1org1@example.com
+        viewers:
+          type: object
+          properties:
+            user2org1@example.com:
+              type: string
+              default: 2023-08-19T16:32:31.459Z
+            user3org1@example.com:
+              type: string
+              default: 2023-08-19T16:32:31.459Z
+        modifiers:
+          type: object
+          properties:
+            user1org2@example.com:
+              type: string
+              default: 2023-08-19T16:32:31.459Z
+        certifiers:
+          type: object
+          properties:
+            user3org3@example.com:
+              type: string
+              default: 2023-08-19T16:32:31.459Z
+    AccessInput:
+      type: object
+      properties:
+        email:
+          type: string
+          default: user2org1@example.com
+        level:
+          type: string
+          default: modifier / viewer / certifier
+    AccessHistoryResponse:
+      type: object
+      properties:
+        counter:
+          type: integer
+          default: 1
+        txns:
+          type: array
+          items:
+            type: object
+            properties:
+              txn:
+                type: string
+                default: 404c8a33a38e7de54098d0352cf803189fdcba91c59939ca98e51aa5ab6ad95c
+              timestamp: 
+                type: string
+                default: 2023-08-19T16:32:31.459Z
+              value:
+                $ref: '#/components/schemas/GetAccessResponse'
+        
+security:
+  - bearerAuth: []

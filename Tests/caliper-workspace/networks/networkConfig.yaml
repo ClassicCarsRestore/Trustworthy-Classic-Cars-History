@@ -1,0 +1,44 @@
+name: Calier test
+version: "2.0.0"
+
+caliper:
+  blockchain: fabric
+
+channels:
+  - channelName: mychannel
+    contracts:
+    - id: classiccars
+
+organizations:
+  - mspid: Org1MSP
+    identities:
+      certificates:
+      - name: 'org1-admin-default'
+        admin: true
+        clientPrivateKey:
+          pem: |-
+            -----BEGIN PRIVATE KEY-----
+            MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOOE9W9S5cL0E95fi
+            Q4lGkpXLlIm9tbjbEFjq04ntZcShRANCAAS6c80sg6J/OfMn2yBIWBWe3LHmrsfT
+            WSSx0OACnJo+YY4EEcoP5fSXevne+UdRFFXmDdriFLKKBkvBr8WV+I41
+            -----END PRIVATE KEY-----
+        clientSignedCert:
+          pem: |-
+            -----BEGIN CERTIFICATE-----
+            MIICUjCCAfmgAwIBAgIUSR/cdeHa8Y7eWXDFLpVrtTsg7D0wCgYIKoZIzj0EAwIw
+            ajELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
+            YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEL
+            MAkGA1UEAxMCY2EwHhcNMjMxMjA3MTkyOTQ4WhcNMjQxMjA3MTk0MzAwWjAgMQ4w
+            DAYDVQQLEwVhZG1pbjEOMAwGA1UEAxMFYWRtaW4wWTATBgcqhkjOPQIBBggqhkjO
+            PQMBBwNCAAS6c80sg6J/OfMn2yBIWBWe3LHmrsfTWSSx0OACnJo+YY4EEcoP5fSX
+            evne+UdRFFXmDdriFLKKBkvBr8WV+I41o4HGMIHDMA4GA1UdDwEB/wQEAwIHgDAM
+            BgNVHRMBAf8EAjAAMB0GA1UdDgQWBBQVfTKt163a8DtvV3OvDjxgcrlELjArBgNV
+            HSMEJDAigCDxeuioE7LnzysMLxVj2G4TB5GmCwTvtBuJEUU2GtEeQTBXBggqAwQF
+            BgcIAQRLeyJhdHRycyI6eyJoZi5BZmZpbGlhdGlvbiI6IiIsImhmLkVucm9sbG1l
+            bnRJRCI6ImFkbWluIiwiaGYuVHlwZSI6ImFkbWluIn19MAoGCCqGSM49BAMCA0cA
+            MEQCIBRmpY8u+XGloJqCbpHSpM++GR5QtN3IlJcbnJSvG1lVAiBGk1R1jsPU7JgR
+            Zad4X/dzrtUI+mUkfzB0dfQPK8yGYQ==
+            -----END CERTIFICATE-----
+    connectionProfile:
+      path: './networks/network.yaml'
+      discover: false

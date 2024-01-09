@@ -1,0 +1,104 @@
+<div *ngIf="!accessHistory" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="accessHistory">
+    <div class="container">
+        <h1>Checking Access History of: {{ classic?.make + " " + classic?.model + " " + classic?.year }}</h1>
+        <h3>Number of Updates: {{accessHistory.counter}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Timeline</h4>
+                        <div id="content">
+                            <ul class="timeline">
+                                <li class="event accessPackage" *ngFor="let txn of txns" [attr.data-date]="formatDate(txn.timestamp)">
+                                    <h3>Transaction ID: {{ txn.txn }}</h3>
+                                    <div class="row">
+                                        <div class="col">
+                                          <p class="card-text clickable-link" (click)="getInfoByEmail(txn.value.ownerEmail)"><i class="bi bi-person"></i> Owner Email: {{txn.value.ownerEmail}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                          <p class="card-text"><i class="bi bi-people"></i> Users with Viewer permissions:</p>
+                                            <div *ngIf="getResults(txn.value.viewers).length > 0">
+                                                <table class="table">
+                                                    <caption>List of Viewers with Email and Grant Date</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Email</th>
+                                                            <th>Grant Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let entry of getResults(txn.value.viewers)">
+                                                            <td class="clickable-link" (click)="getInfoByEmail(entry[0])">{{ entry[0] }}</td>
+                                                            <td>{{ formatDate(entry[1]) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div *ngIf="getResults(txn.value.viewers).length == 0">
+                                                <p>This classic was no viewers.</p>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <p class="card-text"><i class="bi bi-wrench-adjustable"></i> Workshops with Modifier permissions:</p>
+                                              <div *ngIf="getResults(txn.value.modifiers).length > 0">
+                                                <table class="table">
+                                                    <caption>List of Modifiers with Email and Grant Date</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Email</th>
+                                                            <th>Grant Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let entry of getResults(txn.value.modifiers)">
+                                                            <td class="clickable-link" (click)="getInfoByEmail(entry[0])">{{ entry[0] }}</td>
+                                                            <td>{{ formatDate(entry[1]) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                              </div>
+                                                <div *ngIf="getResults(txn.value.modifiers).length == 0">
+                                                <p>This classic was no modifiers.</p>
+                                              </div>
+                                        </div>
+                                        <div class="col">
+                                            <p class="card-text"><i class="bi bi-clipboard-check"></i> Authorities with Certifier permissions:</p>
+                                              <div *ngIf="getResults(txn.value.certifiers).length > 0">
+                                                <table class="table">
+                                                    <caption>List of Certifiers with Email and Grant Date</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Email</th>
+                                                            <th>Grant Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let entry of getResults(txn.value.certifiers)">
+                                                            <td class="clickable-link" (click)="getInfoByEmail(entry[0])">{{ entry[0] }}</td>
+                                                            <td>{{ formatDate(entry[1]) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                              </div>
+                                                  <div *ngIf="getResults(txn.value.certifiers).length == 0">
+                                                  <p>This classic was no certifiers.</p>
+                                              </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

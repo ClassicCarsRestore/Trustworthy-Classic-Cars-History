@@ -1,0 +1,18 @@
+.userinfo {
+  min-width: 30%;
+  max-width: 30%;
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.jumbotron {
+  padding: 4rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  margin-top: 20px;
+}

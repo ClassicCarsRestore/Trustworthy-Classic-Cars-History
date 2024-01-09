@@ -1,0 +1,190 @@
+<div *ngIf="!classic" class="text-center">
+  <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<div *ngIf="classic">
+  <div class="row">
+    <div class="col">
+      <h1 id="projectName">{{ this.classic.make + " " + this.classic.model + " " + this.classic.year }}</h1>
+    </div>
+    <div class="col d-flex justify-content-end" *ngIf="access === 'owner'">
+      <button (click)="copyLinkToClipboard()" class="btn btn-primary">
+        <i class="bi bi-share"></i> Click to Copy Link
+      </button>
+    </div>
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+            data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+            aria-controls="panelsStayOpen-collapseOne">
+            <i class="bi bi-bar-chart-steps"></i>&nbsp;Vehicle Data
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+          aria-labelledby="panelsStayOpen-headingOne">
+          <div class="accordion-body">
+            <div class="row">
+              <div class="col">
+                <p><strong> <i class="bi bi-gear"></i> Make: </strong> {{this.classic.make}}</p>
+                <p><strong> <i class="bi bi-layers"></i> Model: </strong> {{this.classic.model}}</p>
+                <p><strong> <i class="bi bi-calendar-check"></i> Year of Manufacture: </strong>{{this.classic.year}}</p>
+                <p><strong> <i class="bi bi-geo-alt"></i> Country of Manufacture: </strong> {{this.classic.country}}</p>
+              </div>
+              <div class="col">
+                <p><strong> <i class="bi bi-card-checklist"></i> Licence Plate: </strong> {{this.classic.licencePlate}}
+                </p>
+                <p><strong> <i class="bi bi-file-earmark-bar-graph"></i> Chassis Number / VIN: </strong>
+                  {{this.classic.chassisNo}}</p>
+                <p><strong> <i class="bi bi-speedometer2"></i> Engine Number: </strong> {{this.classic.engineNo}}</p>
+                <p class="clickable-link" (click)="getInfoByEmail(this.classic.ownerEmail)"><strong> <i class="bi bi-person"></i> Owner: </strong> {{this.classic.ownerEmail}}</p>
+              </div>
+              <div class="col">
+                <p><strong> <i class="bi bi-people"></i> Prior Owners: </strong>
+                <div *ngIf="priorOwners && priorOwners.length > 0">
+                  <ul class="list-group">
+                    <li class="list-group-item clickable-link" *ngFor="let prior of priorOwners" (click)="getInfoByEmail(prior)">{{ prior }}</li>
+                  </ul>
+                </div>
+                <div *ngIf="priorOwners && priorOwners.length == 0">
+                  <p>This vehicle has no prior owners.</p>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <p *ngIf="access === 'owner'">
+                  <button class="btn btn-primary" (click)="editClassic(this.classic)">
+                    <i class="bi bi-pencil"></i> Edit Information
+                  </button>
+                </p>
+                <p>
+                  <button class="btn btn-info" (click)="getHistory(this.classic)">
+                    <i class="bi bi-book"></i> History
+                  </button>
+                </p>
+              </div>
+              <div class="col">
+                <p *ngIf="access === 'owner'">
+                  <button class="btn btn-secondary" (click)="updateOwner(this.classic)">
+                    <i class="bi bi-person-lock"></i> Access Permissions
+                  </button>
+                </p>
+                <p *ngIf="access === 'owner'">
+                  <button class="btn btn-info" (click)="getAccessHistory(this.classic)">
+                    <i class="bi bi-book-half"></i> Access History
+                  </button>
+                </p>
+              </div>
+              <div class="col"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+            aria-controls="panelsStayOpen-collapseTwo">
+            <i class="bi bi-tools"></i>&nbsp;Restorations
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+          aria-labelledby="panelsStayOpen-headingTwo">
+          <div class="accordion-body">
+            <div *ngIf="access === 'owner' || access === 'modifier'" style="margin-bottom: 1%;">
+              <button class="btn btn-primary" (click)="createStep(this.classic)">
+                <i class="bi bi-plus-circle"></i> Add new Procedure
+              </button>
+            </div>
+            <div *ngIf="restorations && restorations.length == 0">
+              <p>This vehicle has no restoration procedures yet.</p>
+            </div>
+            <div class="row" *ngIf="restorations && restorations.length > 0">
+              <ng-container *ngFor="let restoration of restorations; let i = index">
+                <div class="col-md-4 mb-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="index-circle">{{i+1}}</div>
+                      <button *ngIf="restoration.photosIds.length > 0" (click)="toggleList(i)" class="btn btn-link btn-circle "><i
+                        class="bi bi-images"></i>
+                      </button>
+                      <button *ngIf="loggedEmail === restoration.madeBy" class="btn btn-link btn-circle2" (click)="goToStep(this.classic.chassisNo, restoration.id)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <h5 class="card-title">{{i+1}}º {{ restoration.title }}</h5>
+                      <p class="card-text">{{ restoration.description }}</p>
+                      <div class="mini-cards" *ngIf="showList[i]">
+                        <div class="mini-card" *ngFor="let photo of restoration.photosIds">
+                          <a href="{{ photo }}"><img [src]="photo" class="card-img-top" alt="Restoration Photo" (error)="handleImageError($event)"></a>
+                        </div>
+                      </div>
+                      <p class="card-text clickable-link" (click)="getInfoByEmail(restoration.madeBy)"><small class="text-muted">Made by: {{ restoration.madeBy }}</small></p>
+                      <p class="card-text"><small class="text-muted">Date: {{ formatDate(restoration.when) }}</small></p>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+            aria-controls="panelsStayOpen-collapseThree">
+            <i class="bi bi-patch-check"></i>&nbsp;Certifications & Other Documentation:
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+          aria-labelledby="panelsStayOpen-headingThree">
+          <div class="accordion-body">
+            <div class="row">
+              <div class="col"> 
+                <h4><strong><i class="bi bi-clipboard-check"></i> Certified By:</strong></h4>
+                <div *ngIf="certifications && certifications.length > 0">
+                  <ul class="list-group">
+                    <li class="list-group-item clickable-link" *ngFor="let cert of certifications" (click)="getInfoByEmail(cert)">{{ cert }}</li>
+                  </ul>
+                </div>
+                <div *ngIf="access === 'certifier'">
+                  <button class="btn btn-primary" (click)="certifyClick(this.classic.chassisNo)" style="margin-top: 10px;">
+                    <i class="bi bi-plus-circle"></i> Add Certification
+                  </button>
+                  <div *ngIf="showSpinnerCertify" class="spinner-border text-primary" role="status">
+                    <span class="sr-only"></span>
+                  </div>
+                </div>
+                <div *ngIf="certifications && certifications.length == 0">
+                  <p>This classic was not yet certified by any certification authority.</p>
+                </div>
+              </div>
+              <div class="col">
+                <h4><strong><i class="bi bi-archive"></i> Extra Documents:</strong></h4>
+                <div *ngIf="documentsArray && documentsArray.length > 0">
+                  <div *ngFor="let entry of documentsArray">
+                    <strong>{{ entry[0] }}: </strong>
+                    <button class="btn btn-light">
+                      <a href="{{ entry[1] }}"><i class="bi bi-file-earmark-text" style="font-size: 1.4em;"></i></a>
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="access === 'owner' || access === 'modifier' || access === 'certifier'">
+                  <button class="btn btn-primary" (click)="addDocument(this.classic)" style="margin-top: 10px;">
+                    <i class="bi bi-plus-circle"></i> Add New Document
+                  </button>
+                </div>
+                <div *ngIf="documentsArray && documentsArray.length == 0">
+                  <p>This classic was no extra documents associated.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

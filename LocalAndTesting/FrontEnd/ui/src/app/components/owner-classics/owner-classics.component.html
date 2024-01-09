@@ -1,0 +1,59 @@
+<div class="row">
+    <div *ngIf="isClient()" class="col" style="margin: auto">
+      <h1 id="tableLabel">My Classics</h1>
+    </div>
+    <div *ngIf="isWorkshop()" class="col" style="margin: auto">
+      <h1 id="tableLabel">Classics to repair:</h1>
+    </div>
+    <div *ngIf="isCertifier()" class="col" style="margin: auto">
+      <h1 id="tableLabel">Classics to certify:</h1>
+    </div>
+    <div class="col" style="margin: auto" *ngIf="isWorkshop() || isCertifier()">
+      <button class="btn btn-success" [routerLink]="['/classics/new']" style="float: right;">New Classic</button>
+    </div>
+  </div>
+  
+  <div *ngIf="!classics" class="text-center">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div *ngIf="classics" style="padding-top: 10px;">
+  
+    <div *ngIf="classics.length == 0">
+      <h6>No classics registed by this user.</h6>
+    </div>
+    <div class="classics-container" *ngIf="classics">
+      <div class="card w-100" *ngFor="let classic of classics" style="background-color: rgba(0,0,0,.03); margin-bottom: 0.3%;">
+        <div class="card-body">
+          <h5 class="card-title"><b>{{ classic.make + " " + classic.model + " " + classic.year }}</b></h5>
+  
+          <div class="row">
+            <div class="col" style="margin: auto">
+              <p class="card-text"><b>Chassis Number:</b> {{ classic.chassisNo }}</p>
+            </div>
+            <div class="col" style="margin: auto">
+              <p class="card-text"><b>Licence Plate:</b> {{ classic.licencePlate }}</p>
+            </div>
+            <div class="col" style="margin: auto">
+              <p class="card-text"><b>Prior Owners:</b> {{ classic.priorOwners.length }}</p>
+            </div>
+            <div class="col" style="margin: auto">
+              <p class="card-text"><b>Restorations:</b> {{ classic.restorations.length }}</p>
+            </div>
+            <div class="col" style="margin: auto">
+              <p class="card-text"><b>Documents:</b> {{ getMapSize(classic.documents) }}</p>
+            </div>
+            <div class="col">
+              <a class="btn btn-primary"  (click)="goToClassicDetails(classic.chassisNo)" style="float:right">Vehicle Card</a>
+            </div> 
+          </div>
+  
+        </div>
+      </div>
+    </div>
+  
+  
+  </div>
+  
