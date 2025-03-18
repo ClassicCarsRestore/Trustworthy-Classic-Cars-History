@@ -6,6 +6,7 @@ import (
 	"classicschain/chaincode/mocks/github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 	"encoding/json"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hyperledger/fabric-protos-go-apiv2/ledger/queryresult"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -1855,5 +1856,1932 @@ func TestSmartContract_UpdateStep(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "put state error")
 		assert.Empty(t, result)
+	})
+}
+
+func TestSmartContract_UpdateStepPhotos(t *testing.T) {
+	t.Run("UpdatesPhotosSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Create a classic with restoration steps
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Rebuild",
+			Description: "Complete rebuild of the engine",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.NoError(t, err)
+		assert.Contains(t, result, "was updated sucessfully")
+
+		// Verify the updated classic object
+		mockStub.AssertNumberOfCalls(t, "PutState", 1)
+		putStateCall := mockStub.Calls[2]
+		updatedClassicBytes := putStateCall.Arguments[1].([]byte)
+
+		var updatedClassic Classic
+		err = json.Unmarshal(updatedClassicBytes, &updatedClassic)
+		assert.NoError(t, err)
+
+		// Check that photos were appended correctly
+		assert.Equal(t, 3, len(updatedClassic.Restorations[0].PhotosIds))
+		assert.Equal(t, "photo1.jpg", updatedClassic.Restorations[0].PhotosIds[0])
+		assert.Equal(t, "photo2.jpg", updatedClassic.Restorations[0].PhotosIds[1])
+		assert.Equal(t, "photo3.jpg", updatedClassic.Restorations[0].PhotosIds[2])
+	})
+
+	t.Run("ReturnsErrorWhenReadClassicAsModifierFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic not found
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenStepNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic with no steps that match
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404nostep")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenUserIsNotStepCreator", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step created by a different user
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Rebuild",
+			Description: "Complete rebuild of the engine",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "otherperson@example.com", // Different from the current user
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404madeby")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenEnrollmentIDAttributeNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Rebuild",
+			Description: "Complete rebuild of the engine",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenEnrollmentIDAttributeReadFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Rebuild",
+			Description: "Complete rebuild of the engine",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, fmt.Errorf("identity error"))
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenPutStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists with matching creator
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Rebuild",
+			Description: "Complete rebuild of the engine",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", newPhotos)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "put state error")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenReadClassicAsModifierFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic not found
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenStepNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic with no steps that match
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404nostep")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenUserIsNotStepCreator", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step created by a different user
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Work",
+			Description: "Engine rebuild",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "otherperson@example.com", // Different from the current user
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404madeby")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenEnrollmentIDAttributeNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Work",
+			Description: "Engine rebuild",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, nil)
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenEnrollmentIDAttributeReadFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Work",
+			Description: "Engine rebuild",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, fmt.Errorf("identity error"))
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenPutStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists with matching creator
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Work",
+			Description: "Engine rebuild",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
+
+		sc := SmartContract{}
+		photosIds := []string{"newphoto1.jpg"}
+		result, err := sc.UpdateStepPhotos(mockCtx, "ABC123", "ABC123_step_0", photosIds)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "put state error")
+		assert.Empty(t, result)
+	})
+}
+
+func TestSmartContract_UpdateStepAndPhotos(t *testing.T) {
+	t.Run("UpdatesStepAndPhotosSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Create a classic with restoration steps
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Old Title",
+			Description: "Old Description",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(nil)
+
+		sc := SmartContract{}
+		newPhotos := []string{"photo2.jpg", "photo3.jpg"}
+		result, err := sc.UpdateStepAndPhotos(
+			mockCtx,
+			"ABC123",
+			"ABC123_step_0",
+			"New Title",
+			"New Description",
+			newPhotos,
+		)
+
+		assert.NoError(t, err)
+		assert.Contains(t, result, "was updated sucessfully")
+
+		// Verify the updated classic object
+		mockStub.AssertNumberOfCalls(t, "PutState", 1)
+		putStateCall := mockStub.Calls[2]
+		updatedClassicBytes := putStateCall.Arguments[1].([]byte)
+
+		var updatedClassic Classic
+		err = json.Unmarshal(updatedClassicBytes, &updatedClassic)
+		assert.NoError(t, err)
+
+		// Check that title, description, and photos were updated correctly
+		assert.Equal(t, "New Title", updatedClassic.Restorations[0].Title)
+		assert.Equal(t, "New Description", updatedClassic.Restorations[0].Description)
+		assert.Equal(t, 3, len(updatedClassic.Restorations[0].PhotosIds))
+		assert.Equal(t, "photo1.jpg", updatedClassic.Restorations[0].PhotosIds[0])
+		assert.Equal(t, "photo2.jpg", updatedClassic.Restorations[0].PhotosIds[1])
+		assert.Equal(t, "photo3.jpg", updatedClassic.Restorations[0].PhotosIds[2])
+	})
+
+	t.Run("ReturnsErrorWhenReadClassicAsModifierFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic not found
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.UpdateStepAndPhotos(
+			mockCtx,
+			"ABC123",
+			"ABC123_step_0",
+			"New Title",
+			"New Description",
+			[]string{"photo2.jpg"},
+		)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenStepNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic with no steps that match
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.UpdateStepAndPhotos(
+			mockCtx,
+			"ABC123",
+			"ABC123_step_0",
+			"New Title",
+			"New Description",
+			[]string{"photo2.jpg"},
+		)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404nostep")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenUserIsNotStepCreator", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step created by a different user
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Old Title",
+			Description: "Old Description",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "otherperson@example.com", // Different from the current user
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.UpdateStepAndPhotos(
+			mockCtx,
+			"ABC123",
+			"ABC123_step_0",
+			"New Title",
+			"New Description",
+			[]string{"photo2.jpg"},
+		)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404madeby")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenEnrollmentIDAttributeNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Old Title",
+			Description: "Old Description",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, nil)
+
+		sc := SmartContract{}
+		result, err := sc.UpdateStepAndPhotos(
+			mockCtx,
+			"ABC123",
+			"ABC123_step_0",
+			"New Title",
+			"New Description",
+			[]string{"photo2.jpg"},
+		)
+
+		assert.Error(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenPutStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Step exists with matching creator
+		step := RestorationStep{
+			ID:          "ABC123_step_0",
+			Title:       "Engine Work",
+			Description: "Engine rebuild",
+			PhotosIds:   []string{"photo1.jpg"},
+			MadeBy:      "modifier@example.com",
+			When:        "2023-04-10T09:00:00Z",
+		}
+
+		classic := Classic{
+			ChassisNo:    "ABC123",
+			Make:         "Ferrari",
+			Model:        "Testarossa",
+			Year:         1985,
+			OwnerEmail:   "owner@example.com",
+			Restorations: []RestorationStep{step},
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
+
+		sc := SmartContract{}
+		result, err := sc.UpdateStepAndPhotos(mockCtx, "ABC123", "ABC123_step_0", "New Title", "New Description", []string{"newphoto.jpg"})
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "put state error")
+		assert.Empty(t, result)
+	})
+}
+
+func TestSmartContract_ClassicExists(t *testing.T) {
+	t.Run("ReturnsTrue_WhenClassicExists", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`{"chassisNo": "ABC123"}`), nil)
+
+		sc := SmartContract{}
+		exists, err := sc.ClassicExists(mockCtx, "ABC123")
+
+		assert.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("ReturnsFalse_WhenClassicDoesNotExist", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+
+		sc := SmartContract{}
+		exists, err := sc.ClassicExists(mockCtx, "ABC123")
+
+		assert.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("ReturnsError_WhenGetStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, fmt.Errorf("state error"))
+
+		sc := SmartContract{}
+		exists, err := sc.ClassicExists(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to read from world state")
+		assert.False(t, exists)
+	})
+}
+
+func TestSmartContract_DeleteClassic(t *testing.T) {
+	t.Run("DeletesClassicSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Classic exists
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`{"chassisNo": "ABC123"}`), nil)
+		mockStub.On("DelState", "Access_ABC123").Return(nil)
+		mockStub.On("DelState", "Classic_ABC123").Return(nil)
+
+		sc := SmartContract{}
+		err := sc.DeleteClassic(mockCtx, "ABC123")
+
+		assert.NoError(t, err)
+		mockStub.AssertCalled(t, "DelState", "Access_ABC123")
+		mockStub.AssertCalled(t, "DelState", "Classic_ABC123")
+	})
+
+	t.Run("ReturnsErrorWhenClassicDoesNotExist", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Classic does not exist
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+
+		sc := SmartContract{}
+		err := sc.DeleteClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		mockStub.AssertNotCalled(t, "DelState", "Access_ABC123")
+		mockStub.AssertNotCalled(t, "DelState", "Classic_ABC123")
+	})
+
+	t.Run("ReturnsErrorWhenClassicExistsFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// GetState fails
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, fmt.Errorf("state error"))
+
+		sc := SmartContract{}
+		err := sc.DeleteClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to read")
+		mockStub.AssertNotCalled(t, "DelState", "Access_ABC123")
+		mockStub.AssertNotCalled(t, "DelState", "Classic_ABC123")
+	})
+
+	t.Run("ReturnsErrorWhenDeleteAccessFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Classic exists, but DelState for Access fails
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`{"chassisNo": "ABC123"}`), nil)
+		mockStub.On("DelState", "Access_ABC123").Return(fmt.Errorf("delete access error"))
+
+		sc := SmartContract{}
+		err := sc.DeleteClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "delete access error")
+		mockStub.AssertCalled(t, "DelState", "Access_ABC123")
+		mockStub.AssertNotCalled(t, "DelState", "Classic_ABC123")
+	})
+
+	t.Run("ReturnsErrorWhenDeleteClassicFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// For ClassicExists check - the classic does exist
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`{"chassisNo": "ABC123"}`), nil).Once()
+
+		// For the actual deletion operations
+		mockStub.On("DelState", "Access_ABC123").Return(nil)
+		mockStub.On("DelState", "Classic_ABC123").Return(fmt.Errorf("delete classic error"))
+
+		sc := SmartContract{}
+		err := sc.DeleteClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "delete classic error")
+		mockStub.AssertCalled(t, "DelState", "Access_ABC123")
+		mockStub.AssertCalled(t, "DelState", "Classic_ABC123")
+	})
+}
+
+func TestSmartContract_ReadClassic(t *testing.T) {
+	t.Run("ReturnsClassicSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic exists and the user is the owner
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "owner@example.com").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.ReadClassic(mockCtx, "ABC123")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Equal(t, "ABC123", result.ChassisNo)
+		assert.Equal(t, "Ferrari", result.Make)
+		assert.Equal(t, "Testarossa", result.Model)
+		assert.Equal(t, 1985, result.Year)
+		assert.Equal(t, "owner@example.com", result.OwnerEmail)
+	})
+
+	t.Run("ReturnsErrorWhenClassicNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Classic not found
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+
+		sc := SmartContract{}
+		result, err := sc.ReadClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// GetState fails
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, fmt.Errorf("database error"))
+
+		sc := SmartContract{}
+		result, err := sc.ReadClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to read from world state")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenUserIsNotOwner", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic exists but user is not the owner
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "owner@example.com").Return(fmt.Errorf("unauthorized"))
+
+		sc := SmartContract{}
+		result, err := sc.ReadClassic(mockCtx, "ABC123")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Nil(t, result)
+	})
+}
+
+func TestSmartContract_AddDocument(t *testing.T) {
+	t.Run("AddsDocumentSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Create a classic with documents
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			Documents:  map[string]string{},
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		// Setup mocks for access check
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"documenter@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("documenter@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.AddDocument(mockCtx, "ABC123", "invoice.pdf", "/path/to/document.pdf")
+
+		assert.NoError(t, err)
+		assert.Contains(t, result, "was added sucessfully")
+
+		// Verify the document was saved
+		mockStub.AssertCalled(t, "PutState", "Classic_ABC123", mock.Anything)
+	})
+
+	t.Run("ReturnsErrorWhenReadClassicAsDocumenterFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic doesn't exist
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("documenter@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.AddDocument(mockCtx, "ABC123", "invoice.pdf", "/path/to/document.pdf")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenAccessCheckFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Classic exists but no access
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			Documents:  map[string]string{},
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		// User is not in the documenter list
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("documenter@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.AddDocument(mockCtx, "ABC123", "invoice.pdf", "/path/to/document.pdf")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenPutStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Create a classic with documents
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			Documents:  map[string]string{},
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+
+		// Set up access
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"documenter@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("documenter@example.com", true, nil)
+		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
+
+		sc := SmartContract{}
+		result, err := sc.AddDocument(mockCtx, "ABC123", "invoice.pdf", "/path/to/document.pdf")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "put state error")
+		assert.Empty(t, result)
+	})
+}
+
+func TestSmartContract_GetClassicHistory2(t *testing.T) {
+	t.Run("ReturnsHistorySuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockHistoryIterator := new(shim.MockHistoryQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock ReadClassicAsViewer to succeed
+		classicJSON, _ := json.Marshal(Classic{ChassisNo: "ABC123"})
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+
+		// Make sure the viewer access timestamp is AFTER the query timestamp
+		// The format is RFC3339 (2023-10-15T12:00:00Z)
+		mockStub.On("GetState", "Access_ABC123").Return([]byte(`{"OwnerEmail":"owner@example.com","Viewers":{"viewer@example.com":"2099-10-01T12:00:00Z"}}`), nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("viewer@example.com", true, nil)
+
+		// Simple history setup
+		mockHistoryResult := &queryresult.KeyModification{
+			TxId:      "tx1",
+			Value:     []byte(`{}`),
+			Timestamp: &timestamp.Timestamp{},
+		}
+
+		mockHistoryIterator.On("HasNext").Return(true).Once()
+		mockHistoryIterator.On("HasNext").Return(false)
+		mockHistoryIterator.On("Next").Return(mockHistoryResult, nil)
+		mockHistoryIterator.On("Close").Return(nil)
+
+		mockStub.On("GetHistoryForKey", "Classic_ABC123").Return(mockHistoryIterator, nil)
+
+		sc := SmartContract{}
+		result, err := sc.GetClassicHistory2(mockCtx, "ABC123", "2023-10-15T12:00:00Z")
+
+		assert.NoError(t, err)
+		assert.NotEmpty(t, result)
+		// Only verify basic structure rather than specific content
+		assert.Contains(t, result, "counter")
+		assert.Contains(t, result, "txns")
+	})
+
+	t.Run("ReturnsErrorWhenReadClassicAsViewerFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock ReadClassicAsViewer to fail (classic not found)
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("viewer@example.com", true, nil)
+
+		sc := SmartContract{}
+		result, err := sc.GetClassicHistory2(mockCtx, "ABC123", "2023-10-15T12:00:00Z")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetHistoryForKeyFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock ReadClassicAsViewer to succeed
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return([]byte(`{"OwnerEmail":"owner@example.com","Viewers":{"viewer@example.com":"2023-10-01T12:00:00Z"}}`), nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("viewer@example.com", true, nil)
+
+		// GetHistoryForKey fails
+		mockStub.On("GetHistoryForKey", "Classic_ABC123").Return(nil, fmt.Errorf("history error"))
+
+		sc := SmartContract{}
+		result, err := sc.GetClassicHistory2(mockCtx, "ABC123", "2023-10-15T12:00:00Z")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Empty(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenHistoryIteratorNextFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockHistoryIterator := new(shim.MockHistoryQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock ReadClassicAsViewer to succeed
+		classic := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			OwnerEmail: "owner@example.com",
+		}
+		classicJSON, _ := json.Marshal(classic)
+		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		mockStub.On("GetState", "Access_ABC123").Return([]byte(`{"OwnerEmail":"owner@example.com","Viewers":{"viewer@example.com":"2023-10-01T12:00:00Z"}}`), nil)
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("viewer@example.com", true, nil)
+
+		// History iterator setup with Next() failing
+		mockHistoryIterator.On("HasNext").Return(true)
+		mockHistoryIterator.On("Next").Return(nil, fmt.Errorf("iterator error"))
+		mockHistoryIterator.On("Close").Return(nil)
+
+		mockStub.On("GetHistoryForKey", "Classic_ABC123").Return(mockHistoryIterator, nil)
+
+		sc := SmartContract{}
+		result, err := sc.GetClassicHistory2(mockCtx, "ABC123", "2023-10-15T12:00:00Z")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Empty(t, result)
+	})
+}
+
+func TestSmartContract_QueryClassicsByOwner(t *testing.T) {
+	t.Run("ReturnsClassicsSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Mock iterator behavior
+		mockStub.On("GetStateByRange", "Classic_", "Classic_\uffff").Return(mockResultsIterator, nil)
+
+		// Create test data for two classics with the same owner
+		classic1 := Classic{
+			ChassisNo:  "ABC123",
+			Make:       "Ferrari",
+			Model:      "Testarossa",
+			Year:       1985,
+			OwnerEmail: "owner@example.com",
+		}
+		classic2 := Classic{
+			ChassisNo:  "DEF456",
+			Make:       "Porsche",
+			Model:      "911",
+			Year:       1982,
+			OwnerEmail: "owner@example.com",
+		}
+		classic3 := Classic{
+			ChassisNo:  "GHI789",
+			Make:       "Lamborghini",
+			Model:      "Countach",
+			Year:       1986,
+			OwnerEmail: "different@example.com",
+		}
+
+		classic1JSON, _ := json.Marshal(classic1)
+		classic2JSON, _ := json.Marshal(classic2)
+		classic3JSON, _ := json.Marshal(classic3)
+
+		// Set up the mock iterator to return all classics
+		mockResultsIterator.On("HasNext").Return(true).Times(3)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Value: classic1JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Value: classic2JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Value: classic3JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByOwner(mockCtx, "owner@example.com")
+
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(result))
+		assert.Equal(t, "ABC123", result[0].ChassisNo)
+		assert.Equal(t, "DEF456", result[1].ChassisNo)
+	})
+
+	t.Run("ReturnsErrorWhenNoClassicsFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Mock empty iterator
+		mockStub.On("GetStateByRange", "Classic_", "Classic_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByOwner(mockCtx, "nonexistent@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateByRangeFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		mockStub.On("GetStateByRange", "Classic_", "Classic_\uffff").Return(nil, fmt.Errorf("iterator error"))
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByOwner(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "iterator error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenNextFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Mock iterator with error on Next()
+		mockStub.On("GetStateByRange", "Classic_", "Classic_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(nil, fmt.Errorf("next error"))
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByOwner(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "next error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenUnmarshalFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockCtx.On("GetStub").Return(mockStub)
+
+		// Mock iterator with invalid JSON
+		mockStub.On("GetStateByRange", "Classic_", "Classic_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Value: []byte(`invalid json`)}, nil)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByOwner(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+}
+
+func TestSmartContract_QueryClassicsByModifier(t *testing.T) {
+	t.Run("ReturnsClassicsSuccessfully", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock identity
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		// Mock iterator behavior
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+
+		// Create test access data
+		access1 := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		access2 := Access{
+			OwnerEmail: "owner2@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+
+		access1JSON, _ := json.Marshal(access1)
+		access2JSON, _ := json.Marshal(access2)
+
+		// Test classic data
+		classic1 := Classic{ChassisNo: "ABC123"}
+		classic2 := Classic{ChassisNo: "DEF456"}
+		classic1JSON, _ := json.Marshal(classic1)
+		classic2JSON, _ := json.Marshal(classic2)
+
+		// Set up the mock iterator to return accesses
+		mockResultsIterator.On("HasNext").Return(true).Times(2)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Key: "Access_ABC123", Value: access1JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Key: "Access_DEF456", Value: access2JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Close").Return(nil)
+
+		// Mock GetState for the classics
+		mockStub.On("GetState", "Classic_ABC123").Return(classic1JSON, nil)
+		mockStub.On("GetState", "Classic_DEF456").Return(classic2JSON, nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Equal(t, 2, len(result))
+	})
+
+	t.Run("ReturnsErrorWhenIdentityAttributeFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, fmt.Errorf("identity error"))
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenIdentityAttributeNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateByRangeFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(nil, fmt.Errorf("iterator error"))
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "iterator error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenNextFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(nil, fmt.Errorf("next error"))
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "next error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenAccessUnmarshalFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Value: []byte(`invalid json`)}, nil)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		// Create valid access data
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true).Once()
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Key: "Access_ABC123", Value: accessJSON}, nil)
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, fmt.Errorf("get state error"))
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenClassicUnmarshalFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+
+		// Create valid access data
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Modifiers:  map[string]string{"modifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true).Once()
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Key: "Access_ABC123", Value: accessJSON}, nil)
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`invalid json`), nil)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenNoClassicsFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("modifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByModifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Nil(t, result)
+	})
+}
+
+func TestSmartContract_QueryClassicsByCertifier(t *testing.T) {
+	t.Run("SuccessfullyReturnsClassics", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		// Mock identity
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+
+		// Mock iterator behavior
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+
+		// Create test access data
+		access1 := Access{
+			OwnerEmail: "owner@example.com",
+			Certifiers: map[string]string{"certifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		access2 := Access{
+			OwnerEmail: "owner2@example.com",
+			Certifiers: map[string]string{"certifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+
+		access1JSON, _ := json.Marshal(access1)
+		access2JSON, _ := json.Marshal(access2)
+
+		// Test classic data
+		classic1 := Classic{ChassisNo: "ABC123"}
+		classic2 := Classic{ChassisNo: "DEF456"}
+		classic1JSON, _ := json.Marshal(classic1)
+		classic2JSON, _ := json.Marshal(classic2)
+
+		// Set up the mock iterator to return accesses
+		mockResultsIterator.On("HasNext").Return(true).Times(2)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Key: "Access_ABC123", Value: access1JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Next").Return(
+			&queryresult.KV{Key: "Access_DEF456", Value: access2JSON}, nil,
+		).Once()
+		mockResultsIterator.On("Close").Return(nil)
+
+		// Mock GetState for the classics
+		mockStub.On("GetState", "Classic_ABC123").Return(classic1JSON, nil)
+		mockStub.On("GetState", "Classic_DEF456").Return(classic2JSON, nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Equal(t, 2, len(result))
+	})
+
+	t.Run("ReturnsErrorWhenIdentityAttributeFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, fmt.Errorf("identity error"))
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenIdentityAttributeNotFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("", false, nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "403")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateByRangeFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(nil, fmt.Errorf("iterator error"))
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "iterator error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenNextFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(nil, fmt.Errorf("next error"))
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "next error")
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenAccessUnmarshalFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Value: []byte(`invalid json`)}, nil)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenGetStateFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+
+		// Create valid access data
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Certifiers: map[string]string{"certifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true).Once()
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Key: "Access_ABC123", Value: accessJSON}, nil)
+		mockStub.On("GetState", "Classic_ABC123").Return(nil, fmt.Errorf("get state error"))
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenClassicUnmarshalFails", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+
+		// Create valid access data
+		access := Access{
+			OwnerEmail: "owner@example.com",
+			Certifiers: map[string]string{"certifier@example.com": "2023-01-01T12:00:00Z"},
+		}
+		accessJSON, _ := json.Marshal(access)
+
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(true).Once()
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Next").Return(&queryresult.KV{Key: "Access_ABC123", Value: accessJSON}, nil)
+		mockStub.On("GetState", "Classic_ABC123").Return([]byte(`invalid json`), nil)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ReturnsErrorWhenNoClassicsFound", func(t *testing.T) {
+		mockCtx := new(contractapi.MockTransactionContextInterface)
+		mockStub := new(shim.MockChaincodeStubInterface)
+		mockResultsIterator := new(shim.MockStateQueryIteratorInterface)
+		mockIdentity := new(cid.MockClientIdentity)
+		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity)
+
+		mockIdentity.On("GetAttributeValue", enrollmentIDAtt).Return("certifier@example.com", true, nil)
+		mockStub.On("GetStateByRange", "Access_", "Access_\uffff").Return(mockResultsIterator, nil)
+		mockResultsIterator.On("HasNext").Return(false)
+		mockResultsIterator.On("Close").Return(nil)
+
+		sc := SmartContract{}
+		result, err := sc.QueryClassicsByCertifier(mockCtx, "owner@example.com")
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "404")
+		assert.Nil(t, result)
 	})
 }

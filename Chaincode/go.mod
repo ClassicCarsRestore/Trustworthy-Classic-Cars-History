@@ -5,6 +5,7 @@ go 1.24.0
 tool github.com/vektra/mockery/v2
 
 require (
+	github.com/golang/protobuf v1.5.4
 	github.com/hyperledger/fabric-chaincode-go/v2 v2.3.0
 	github.com/hyperledger/fabric-contract-api-go/v2 v2.2.0
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.6

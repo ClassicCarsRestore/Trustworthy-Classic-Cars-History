@@ -324,6 +324,7 @@ func (s *SmartContract) UpdateStepPhotos(ctx contractapi.TransactionContextInter
 }
 
 // UpdateStepAndPhotos updates the title, description and photos of the step with given stepId of the classic stored in the world state with given chassisNo.
+// TODO check if needed; redundant with UpdateStep and UpdateStepPhotos
 func (s *SmartContract) UpdateStepAndPhotos(ctx contractapi.TransactionContextInterface, chassisNo string, stepId string, newTitle string, newDescription string, newPhotosIds []string) (string, error) {
 	classic, err := s.ReadClassicAsModifier(ctx, chassisNo)
 	if err != nil {
@@ -515,8 +516,9 @@ func (s *SmartContract) QueryClassicsByModifier(ctx contractapi.TransactionConte
 		return nil, err
 	}
 	if !ok {
-		return nil, err
+		return nil, fmt.Errorf("403")
 	}
+
 	resultsIterator, err := ctx.GetStub().GetStateByRange("Access_", "Access_\uffff")
 	if err != nil {
 		return nil, err
@@ -561,8 +563,9 @@ func (s *SmartContract) QueryClassicsByCertifier(ctx contractapi.TransactionCont
 		return nil, err
 	}
 	if !ok {
-		return nil, err
+		return nil, fmt.Errorf("403")
 	}
+
 	resultsIterator, err := ctx.GetStub().GetStateByRange("Access_", "Access_\uffff")
 	if err != nil {
 		return nil, err
