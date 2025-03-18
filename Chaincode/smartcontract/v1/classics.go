@@ -17,7 +17,7 @@ func (s *SmartContract) GetAllClassics(ctx contractapi.TransactionContextInterfa
 	}
 	defer resultsIterator.Close()
 
-	var classics []*Classic
+	classics := []*Classic{}
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
@@ -44,7 +44,7 @@ func (s *SmartContract) CreateClassic(ctx contractapi.TransactionContextInterfac
 	}
 	if !ok {
 		// TODO needs proper error handling
-		return err
+		return fmt.Errorf("403")
 	}
 	if org != Org2MSP && org != Org3MSP {
 		return fmt.Errorf("403")
@@ -84,8 +84,14 @@ func (s *SmartContract) CreateClassic(ctx contractapi.TransactionContextInterfac
 		Certifiers: map[string]string{},
 	}
 
-	user, _, _ := ctx.GetClientIdentity().GetAttributeValue(enrollmentIDAtt)
-	// TODO check these conditions
+	user, ok, err := ctx.GetClientIdentity().GetAttributeValue(enrollmentIDAtt)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		// TODO needs proper error handling
+		return fmt.Errorf("403")
+	}
 	if org == Org2MSP {
 		access.Modifiers[user] = currentTime
 	} else if org == Org3MSP {
@@ -98,7 +104,10 @@ func (s *SmartContract) CreateClassic(ctx contractapi.TransactionContextInterfac
 	}
 
 	// TODO needs error handling
-	ctx.GetStub().PutState(accessKey(chassisNo), accessJSON)
+	err = ctx.GetStub().PutState(accessKey(chassisNo), accessJSON)
+	if err != nil {
+		return err
+	}
 
 	return ctx.GetStub().PutState(classicKey(chassisNo), classicJSON)
 }
