@@ -36,6 +36,7 @@ func (s *SmartContract) GetAllClassics(ctx contractapi.TransactionContextInterfa
 }
 
 // CreateClassic issues a new asset to the world state with given details. Only a verified workshop can perform this function
+// TODO refactor to receive struct
 func (s *SmartContract) CreateClassic(ctx contractapi.TransactionContextInterface, make string, model string, year int, licencePlate string, country string, chassisNo string, engineNo string, ownerEmail string, currentTime string) error {
 	org, ok, err := ctx.GetClientIdentity().GetAttributeValue("org")
 	if err != nil {
