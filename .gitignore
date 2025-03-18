@@ -23,3 +23,6 @@ LocalAndTesting/FrontEnd/ui/.angular/cache
 Tests/API/testDocs/*
 Tests/caliper-workspace/node_modules
 Tests/caliper-workspace/caliper.log
+
+.vscode
+.idea
