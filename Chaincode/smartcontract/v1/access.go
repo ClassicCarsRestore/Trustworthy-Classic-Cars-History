@@ -1,9 +1,9 @@
-package main
+package v1
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 	"strconv"
 	"time"
 )
@@ -124,7 +124,7 @@ func (s *SmartContract) HasViewerAccess(ctx contractapi.TransactionContextInterf
 		return false, err
 	}
 	if !ok {
-		return false, err
+		return false, fmt.Errorf("403")
 	}
 	if user == access.OwnerEmail {
 		return true, nil
@@ -202,7 +202,7 @@ func (s *SmartContract) HasModifierAccess(ctx contractapi.TransactionContextInte
 		return false, err
 	}
 	if !ok {
-		return false, err
+		return false, fmt.Errorf("403")
 	}
 	if user == access.OwnerEmail {
 		return true, nil
@@ -261,7 +261,7 @@ func (s *SmartContract) HasCertifierAccess(ctx contractapi.TransactionContextInt
 		return false, err
 	}
 	if !ok {
-		return false, err
+		return false, fmt.Errorf("403")
 	}
 
 	_, ok = access.Certifiers[user]
@@ -298,7 +298,7 @@ func (s *SmartContract) MarkAsCertified(ctx contractapi.TransactionContextInterf
 		return nil, err
 	}
 	if !ok {
-		return nil, err
+		return nil, fmt.Errorf("403")
 	}
 	classic.Certifications = append(classic.Certifications, user)
 
@@ -334,7 +334,7 @@ func (s *SmartContract) HasDocumenterAccess(ctx contractapi.TransactionContextIn
 		return false, err
 	}
 	if !ok {
-		return false, err
+		return false, fmt.Errorf("403")
 	}
 	if user == access.OwnerEmail {
 		return true, nil
@@ -397,7 +397,7 @@ func (s *SmartContract) CheckUserAccess(ctx contractapi.TransactionContextInterf
 		return "", err
 	}
 	if !ok {
-		return "", err
+		return "", fmt.Errorf("403")
 	}
 	if user == access.OwnerEmail {
 		return accessLevelOwner, nil

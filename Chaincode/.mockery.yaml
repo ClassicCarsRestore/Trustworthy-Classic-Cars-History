@@ -1,0 +1,12 @@
+with-expecter: true
+packages:
+  github.com/hyperledger/fabric-contract-api-go/v2/contractapi:
+    interfaces:
+      TransactionContextInterface:
+  github.com/hyperledger/fabric-chaincode-go/v2/shim:
+    interfaces:
+      ChaincodeStubInterface:
+      HistoryQueryIteratorInterface:
+  github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid:
+    interfaces:
+      ClientIdentity:

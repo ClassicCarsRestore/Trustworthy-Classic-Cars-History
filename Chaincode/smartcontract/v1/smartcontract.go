@@ -1,9 +1,9 @@
-package main
+package v1
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 
 	"encoding/base64"
 )
@@ -74,7 +74,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 			return err
 		}
 
-		err = ctx.GetStub().PutState("Classic_"+classic.ChassisNo, classicJSON)
+		err = ctx.GetStub().PutState(classicKey(classic.ChassisNo), classicJSON)
 		if err != nil {
 			return fmt.Errorf("failed to put to world state. %v", err)
 		}

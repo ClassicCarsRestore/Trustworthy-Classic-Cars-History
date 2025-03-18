@@ -1,9 +1,9 @@
-package main
+package v1
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 	"strconv"
 	"strings"
 	"time"
