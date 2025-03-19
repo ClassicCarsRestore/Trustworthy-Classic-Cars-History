@@ -381,7 +381,10 @@ func (s *SmartContract) DeleteClassic(ctx contractapi.TransactionContextInterfac
 		return fmt.Errorf("404")
 	}
 
-	ctx.GetStub().DelState(accessKey(chassisNo))
+	err = ctx.GetStub().DelState(accessKey(chassisNo))
+	if err != nil {
+		return err
+	}
 	return ctx.GetStub().DelState(classicKey(chassisNo))
 }
 

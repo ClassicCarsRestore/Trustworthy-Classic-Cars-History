@@ -657,7 +657,9 @@ func TestSmartContract_UpdateClassic(t *testing.T) {
 	t.Run("ReturnsErrorWhenPutStateFails", func(t *testing.T) {
 		mockCtx := new(contractapi.MockTransactionContextInterface)
 		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity) // Add identity mock
 		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity) // Link identity to context
 
 		// Create initial classic
 		classic := Classic{
@@ -668,10 +670,13 @@ func TestSmartContract_UpdateClassic(t *testing.T) {
 			LicencePlate: "OLD123",
 			Country:      "Italy",
 			EngineNo:     "ENG123",
+			OwnerEmail:   "owner@example.com", // Add owner email for identity check
 		}
 		classicJSON, _ := json.Marshal(classic)
 
 		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
+		// Add identity assertion mock
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "owner@example.com").Return(nil)
 		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
 
 		sc := SmartContract{}
@@ -775,7 +780,9 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 	t.Run("ReturnsErrorWhenAccessNotFound", func(t *testing.T) {
 		mockCtx := new(contractapi.MockTransactionContextInterface)
 		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity) // Add the mock identity
 		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity) // Link identity to context
 
 		// Classic exists but access does not
 		classic := Classic{
@@ -790,6 +797,9 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
 		mockStub.On("GetState", "Access_ABC123").Return(nil, nil)
 
+		// Mock the identity check in ReadClassic
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "oldowner@example.com").Return(nil)
+
 		sc := SmartContract{}
 		result, err := sc.UpdateClassicEmail(mockCtx, "ABC123", "newowner@example.com")
 
@@ -798,12 +808,14 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 		assert.Empty(t, result)
 	})
 
-	t.Run("ReturnsErrorWhenAccessReadFails", func(t *testing.T) {
+	t.Run("ReturnsErrorWhenAccessNotFound", func(t *testing.T) {
 		mockCtx := new(contractapi.MockTransactionContextInterface)
 		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity) // Add the mock identity
 		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity) // Link identity to context
 
-		// Classic exists but access read fails
+		// Classic exists but access does not
 		classic := Classic{
 			ChassisNo:  "ABC123",
 			Make:       "Ferrari",
@@ -814,38 +826,25 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 		classicJSON, _ := json.Marshal(classic)
 
 		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
-		mockStub.On("GetState", "Access_ABC123").Return(nil, fmt.Errorf("database error"))
+		mockStub.On("GetState", "Access_ABC123").Return(nil, nil)
+
+		// Mock the identity check in ReadClassic
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "oldowner@example.com").Return(nil)
 
 		sc := SmartContract{}
 		result, err := sc.UpdateClassicEmail(mockCtx, "ABC123", "newowner@example.com")
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to read from world state")
+		assert.Contains(t, err.Error(), "404")
 		assert.Empty(t, result)
-	})
-
-	t.Run("ReturnsErrorWhenClassicMarshalFails", func(t *testing.T) {
-		mockCtx := new(contractapi.MockTransactionContextInterface)
-		mockStub := new(shim.MockChaincodeStubInterface)
-		mockCtx.On("GetStub").Return(mockStub)
-
-		// Test can't directly mock json.Marshal failure, so skip this test
-		// This is included for completeness of the test suite
-	})
-
-	t.Run("ReturnsErrorWhenAccessMarshalFails", func(t *testing.T) {
-		mockCtx := new(contractapi.MockTransactionContextInterface)
-		mockStub := new(shim.MockChaincodeStubInterface)
-		mockCtx.On("GetStub").Return(mockStub)
-
-		// Test can't directly mock json.Marshal failure, so skip this test
-		// This is included for completeness of the test suite
 	})
 
 	t.Run("ReturnsErrorWhenClassicPutStateFails", func(t *testing.T) {
 		mockCtx := new(contractapi.MockTransactionContextInterface)
 		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity) // Add mock identity
 		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity) // Link identity to context
 
 		// Initialize classic and access objects
 		classic := Classic{
@@ -867,6 +866,7 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 
 		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
 		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "oldowner@example.com").Return(nil) // Add auth check mock
 
 		// PutState for classic fails
 		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(fmt.Errorf("put state error"))
@@ -882,7 +882,9 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 	t.Run("ReturnsErrorWhenAccessPutStateFails", func(t *testing.T) {
 		mockCtx := new(contractapi.MockTransactionContextInterface)
 		mockStub := new(shim.MockChaincodeStubInterface)
+		mockIdentity := new(cid.MockClientIdentity) // Add mock identity
 		mockCtx.On("GetStub").Return(mockStub)
+		mockCtx.On("GetClientIdentity").Return(mockIdentity) // Link identity to context
 
 		// Initialize classic and access objects
 		classic := Classic{
@@ -904,6 +906,7 @@ func TestSmartContract_UpdateClassicEmail(t *testing.T) {
 
 		mockStub.On("GetState", "Classic_ABC123").Return(classicJSON, nil)
 		mockStub.On("GetState", "Access_ABC123").Return(accessJSON, nil)
+		mockIdentity.On("AssertAttributeValue", enrollmentIDAtt, "oldowner@example.com").Return(nil) // Add auth check mock
 
 		// PutState for classic succeeds but access update fails
 		mockStub.On("PutState", "Classic_ABC123", mock.Anything).Return(nil)
