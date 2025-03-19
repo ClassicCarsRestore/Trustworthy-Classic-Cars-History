@@ -50,7 +50,7 @@ func TestSmartContract_GetAccess(t *testing.T) {
 		_, err := sc.GetAccess(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 	})
 
 	t.Run("ReturnsErrorWhenWorldStateReadFails", func(t *testing.T) {
@@ -973,7 +973,7 @@ func TestSmartContract_ReadClassicAsViewer(t *testing.T) {
 		result, err := sc.ReadClassicAsViewer(mockCtx, "ABC123", "2023-01-01T12:00:00Z")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Nil(t, result)
 	})
 
@@ -1402,7 +1402,7 @@ func TestSmartContract_ReadClassicAsModifier(t *testing.T) {
 		result, err := sc.ReadClassicAsModifier(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Nil(t, result)
 	})
 
@@ -1748,7 +1748,7 @@ func TestSmartContract_MarkAsCertified(t *testing.T) {
 		result, err := sc.MarkAsCertified(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Nil(t, result)
 	})
 
@@ -2030,7 +2030,7 @@ func TestSmartContract_HasDocumenterAccess(t *testing.T) {
 		result, err := sc.HasDocumenterAccess(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.False(t, result)
 	})
 
@@ -2299,7 +2299,7 @@ func TestSmartContract_ReadClassicAsDocumenter(t *testing.T) {
 		result, err := sc.ReadClassicAsDocumenter(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Nil(t, result)
 	})
 
@@ -2549,7 +2549,7 @@ func TestSmartContract_CheckUserAccess(t *testing.T) {
 		result, err := sc.CheckUserAccess(mockCtx, "ABC123", "2023-01-01T12:00:00Z")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Equal(t, "", result)
 	})
 
@@ -2740,7 +2740,7 @@ func TestSmartContract_GetAccessHistory(t *testing.T) {
 		result, err := sc.GetAccessHistory(mockCtx, "ABC123")
 
 		assert.Error(t, err)
-		assert.Equal(t, "404", err.Error())
+		assert.Contains(t, err.Error(), "404")
 		assert.Empty(t, result)
 	})
 

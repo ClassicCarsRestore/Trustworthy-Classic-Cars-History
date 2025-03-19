@@ -159,18 +159,9 @@ func (s *SmartContract) HasViewerAccess(ctx contractapi.TransactionContextInterf
 
 // ReadClassicAsViewer returns the asset stored in the world state with given chassisNo. Only if the user has viewer access level
 func (s *SmartContract) ReadClassicAsViewer(ctx contractapi.TransactionContextInterface, chassisNo string, currentTime string) (*Classic, error) {
-	classicJSON, err := ctx.GetStub().GetState(classicKey(chassisNo))
+	classic, err := s.getClassic(ctx, chassisNo)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if classicJSON == nil {
-		return nil, fmt.Errorf("404")
-	}
-
-	var classic Classic
-	err = json.Unmarshal(classicJSON, &classic)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get classic: %v", err)
 	}
 
 	hasAccess, err := s.HasViewerAccess(ctx, chassisNo, currentTime)
@@ -178,7 +169,7 @@ func (s *SmartContract) ReadClassicAsViewer(ctx contractapi.TransactionContextIn
 		return nil, fmt.Errorf("403")
 	}
 
-	return &classic, nil
+	return classic, nil
 }
 
 // HasModifierAccess checks if the user making the request has modifier access level
@@ -218,18 +209,9 @@ func (s *SmartContract) HasModifierAccess(ctx contractapi.TransactionContextInte
 
 // ReadClassicAsModifier returns the asset stored in the world state with given chassisNo. Only if the user has modifier access level
 func (s *SmartContract) ReadClassicAsModifier(ctx contractapi.TransactionContextInterface, chassisNo string) (*Classic, error) {
-	classicJSON, err := ctx.GetStub().GetState(classicKey(chassisNo))
+	classic, err := s.getClassic(ctx, chassisNo)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if classicJSON == nil {
-		return nil, fmt.Errorf("404")
-	}
-
-	var classic Classic
-	err = json.Unmarshal(classicJSON, &classic)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get classic: %v", err)
 	}
 
 	hasAccess, err := s.HasModifierAccess(ctx, chassisNo)
@@ -237,7 +219,7 @@ func (s *SmartContract) ReadClassicAsModifier(ctx contractapi.TransactionContext
 		return nil, fmt.Errorf("403")
 	}
 
-	return &classic, nil
+	return classic, nil
 }
 
 // HasCertifierAccess checks if the user making the request has certifier access level
@@ -274,18 +256,9 @@ func (s *SmartContract) HasCertifierAccess(ctx contractapi.TransactionContextInt
 
 // MarkAsCertified marks the classic as certified by the user making the request
 func (s *SmartContract) MarkAsCertified(ctx contractapi.TransactionContextInterface, chassisNo string) (*Classic, error) {
-	classicJSON, err := ctx.GetStub().GetState(classicKey(chassisNo))
+	classic, err := s.getClassic(ctx, chassisNo)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if classicJSON == nil {
-		return nil, fmt.Errorf("404")
-	}
-
-	var classic Classic
-	err = json.Unmarshal(classicJSON, &classic)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get classic: %v", err)
 	}
 
 	hasAccess, err := s.HasCertifierAccess(ctx, chassisNo)
@@ -300,6 +273,7 @@ func (s *SmartContract) MarkAsCertified(ctx contractapi.TransactionContextInterf
 	if !ok {
 		return nil, fmt.Errorf("403")
 	}
+
 	classic.Certifications = append(classic.Certifications, user)
 
 	newJSON, err := json.Marshal(classic)
@@ -310,7 +284,8 @@ func (s *SmartContract) MarkAsCertified(ctx contractapi.TransactionContextInterf
 	if err != nil {
 		return nil, err
 	}
-	return &classic, nil
+
+	return classic, nil
 }
 
 // HasDocumenterAccess checks if the user making the request has documenter access level
@@ -355,18 +330,9 @@ func (s *SmartContract) HasDocumenterAccess(ctx contractapi.TransactionContextIn
 
 // ReadClassicAsDocumenter returns the asset stored in the world state with given chassisNo. Only if the user has documenter access level
 func (s *SmartContract) ReadClassicAsDocumenter(ctx contractapi.TransactionContextInterface, chassisNo string) (*Classic, error) {
-	classicJSON, err := ctx.GetStub().GetState(classicKey(chassisNo))
+	classic, err := s.getClassic(ctx, chassisNo)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if classicJSON == nil {
-		return nil, fmt.Errorf("404")
-	}
-
-	var classic Classic
-	err = json.Unmarshal(classicJSON, &classic)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get classic: %v", err)
 	}
 
 	hasAccess, err := s.HasDocumenterAccess(ctx, chassisNo)
@@ -374,7 +340,7 @@ func (s *SmartContract) ReadClassicAsDocumenter(ctx contractapi.TransactionConte
 		return nil, fmt.Errorf("403")
 	}
 
-	return &classic, nil
+	return classic, nil
 }
 
 // CheckUserAccess checks the level of access the requesting user has regarding the classic with chassisNo

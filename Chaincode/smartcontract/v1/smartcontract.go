@@ -122,3 +122,21 @@ func accessKey(chassisNo string) string {
 func classicKey(chassisNo string) string {
 	return fmt.Sprintf("Classic_%s", chassisNo)
 }
+
+func (s *SmartContract) getClassic(ctx contractapi.TransactionContextInterface, chassisNo string) (*Classic, error) {
+	classicJSON, err := ctx.GetStub().GetState(classicKey(chassisNo))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if classicJSON == nil {
+		return nil, fmt.Errorf("404")
+	}
+
+	var classic Classic
+	err = json.Unmarshal(classicJSON, &classic)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal Classic JSON: %v", err)
+	}
+
+	return &classic, nil
+}
