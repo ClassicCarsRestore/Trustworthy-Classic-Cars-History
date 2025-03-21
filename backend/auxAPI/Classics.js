@@ -12,26 +12,10 @@ import {
 } from "./AuxFunctions.js";
 import {nftstorage, getNetworks } from "../index.js";
 import {sendEmail} from "./AppUtil.js";
-//Transaction
 import { BlockDecoder } from 'fabric-common';
 import { X509Certificate } from 'crypto';
 import {packToBlob} from 'ipfs-car/pack/blob'
 
-/**
- * @export
- * @async
- * @description Gets all the available classics in the system (works as homepage for admins)
- */
-export async function getAllClassics(req, res) {
-  try {
-    const network = await getNetworks(req.email, req.orgName)
-    const contract = network.getContract("classiccars");
-    const result = await contract.evaluateTransaction("GetAllClassics");
-    evaluateSuccess(res, result);
-  } catch (error) {
-    internalServerError("evaluate", error, res);
-  }
-}
 
 /**
  * @export

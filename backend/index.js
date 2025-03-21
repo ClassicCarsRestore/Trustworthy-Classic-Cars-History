@@ -1,21 +1,21 @@
 import express from "express";
 import bodyParser from "body-parser";
-// Setting for Hyperledger Fabric
 import { Gateway, Wallets } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 import fs from "fs";
-//JWT
 import jwt from "jsonwebtoken";
 import bearerToken from "express-bearer-token";
-
-//MongoDB
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
-dotenv.config();
-//Bcrypt
 import bcrypt from "bcrypt";
-
-//Fabric local modules
+import { fileURLToPath } from "url";
+import { path, dirname } from "path";
+import fileUpload from "express-fileupload";
+import swaggerUi from "swagger-ui-express";
+import yaml from "js-yaml";
+import cors from "cors";
+import https from "https";
+import { NFTStorage } from 'nft.storage';
 import {
   buildCAClient,
   registerAndEnrollUser,
@@ -23,7 +23,6 @@ import {
 } from "./auxAPI/CAUtil.js";
 import { buildCCP, buildWallet, sendEmail } from "./auxAPI/AppUtil.js";
 import {
-  getAllClassics, 
   createClassic,
   updateClassic, 
   updateClassicEmail,
@@ -39,8 +38,6 @@ import {
 import {
   createRestorationStep,
   getStep,
-  updateStep,
-  updateStepPhotos,
   updateStepAndPhotos,
 } from "./auxAPI/Restorations.js";
 import {
@@ -60,22 +57,7 @@ import {
   notFoundinSystem,
 } from "./auxAPI/AuxFunctions.js";
 
-
-import { fileURLToPath } from "url";
-import { path, dirname } from "path";
-
-//import fs from 'fs'
-import fileUpload from "express-fileupload";
-
-//Swagger
-import swaggerUi from "swagger-ui-express";
-import yaml from "js-yaml";
-
-//CORS 
-import cors from "cors";
-
-//HTTPS
-import https from "https";
+dotenv.config();
 
 //Fabric Global Variables
 let gateways = [];
@@ -84,12 +66,10 @@ let wallet2;
 let wallet3;
 let ccp;
 
-//MONGODB SETTINGS
 let usersdb;
 
-
 // Import the NFTStorage class and File constructor from the 'nft.storage' package
-import { NFTStorage} from 'nft.storage';
+// TODO fix dependency
 export let nftstorage;
 
 const app = express();
@@ -99,17 +79,14 @@ app.use(fileUpload());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// TODO deprecate in favor of reverse proxy w/ tls termination
 const httpsOptions = {
   key: fs.readFileSync(path.join(__dirname, 'cert', 'privkey1.pem')),
   cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert1.pem')),
 };
 
-// set secret variable
 app.set("secret", process.env.JWT_SECRET);
-
 app.use(bearerToken());
-
-//CORS
 app.use(cors());
 
 // Read the Swagger YAML file
@@ -206,6 +183,7 @@ server.listen(8393, async () => {
       // Get the contract from the network.
       const contract = network.getContract("classiccars");
 
+      // TODO shouldnt be done every time the api starts
       console.log(
         "\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger"
       );
@@ -296,6 +274,7 @@ app.post("/api/Users", async (req, res) => {
     //MongoDB
     //10 is the salt
     const hashedpw = await bcrypt.hash(password, 10);
+    // TODO introduce generated ui and/or id card as main identifier (or result of id doc verification)
     usersdb.insertOne({
       email: email,
       password: hashedpw,
@@ -411,15 +390,6 @@ app.get("/api/Users/Get/:email", async (req, res) => {
 });
 
 /**
- * @GET
- * @async
- * @description Gets all the available classics in the system (works as homepage for admins)
- */
-app.get("/api/Classics/GetAll", async (req, res) => {
-  getAllClassics(req,res);
-});
-
-/**
  * @POST
  * @async
  * @description Creates a new classic with details got from the request body, and adds this classic
@@ -469,28 +439,6 @@ app.post("/api/Restorations/Create/:chassisNo", async (req, res) => {
  */
 app.get("/api/Restorations/Get/:chassisNo/:stepId", async (req, res) => {
   getStep(req, res);
-});
-
-/**
- * @PUT
- * @async
- * @description Updates a specific restoration procedure of a classic
- * @returns a sucess or fail message
- * Only the users with modifier access level can execute this function
- */
-app.put("/api/Restorations/Update/:chassisNo", async (req, res) => {
-  updateStep(req, res);
-});
-
-/**
- * @PUT
- * @async
- * @description Updates a specific restoration procedure of a classic with new photos/documents
- * @returns a sucess or fail message
- * Only the users with modifier access level can execute this function
- */
-app.put("/api/Restorations/Update/:chassisNo/Photos", async (req, res) => {
-  updateStepPhotos(req, res);
 });
 
 /**

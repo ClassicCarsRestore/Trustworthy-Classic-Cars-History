@@ -31,6 +31,7 @@ export function buildCCP() {
   return ccp;
 }
 
+// TODO
 export async function buildWallet(Wallets, walletPath) {
   // Create a new  wallet : Note that wallet is for managing identities.
   let wallet;
@@ -44,14 +45,7 @@ export async function buildWallet(Wallets, walletPath) {
   return wallet;
 }
 
-export function prettyJSONString(inputString) {
-  if (inputString) {
-    return JSON.stringify(JSON.parse(inputString), null, 2);
-  } else {
-    return inputString;
-  }
-}
-
+// TODO why are emails sent from a specific workshop's email?
 export async function sendEmail(recipient, subject, message) {
   console.log(process.env.EMAIL_EMAIL);
   const mailOptions = {

@@ -1,9 +1,9 @@
-Api&Application/org1-wallet/*
-Api&Application/org2-wallet/*
-Api&Application/org3-wallet/*
-Api&Application/.env
-Api&Application/node_modules
-Api&Application/cert
+backend/org1-wallet/*
+backend/org2-wallet/*
+backend/org3-wallet/*
+backend/.env
+backend/node_modules
+backend/cert
 
 ClientApp/node_modules
 ClientApp/.vscode
