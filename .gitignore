@@ -5,6 +5,8 @@ backend/.env
 backend/node_modules
 backend/cert
 
+Chaincode/vendor
+
 ClientApp/node_modules
 ClientApp/.vscode
 ClientApp/cert
@@ -26,3 +28,7 @@ Tests/caliper-workspace/caliper.log
 
 .vscode
 .idea
+
+localnet/.fabric
+localnet/.crypto-config
+localnet/.channel-artifacts

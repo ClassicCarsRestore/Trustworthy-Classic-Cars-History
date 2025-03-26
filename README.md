@@ -28,12 +28,20 @@ Please refer to this [link](https://youtu.be/OneQtXx7c9w) to a demonstration vid
 ## Local Deployment
 
 ### Pre-requisites
+- Install [Taskfile](https://taskfile.dev/installation/)
+
 - Having Ubuntu 20.04 installed on your machine to be able to run the deployment scripts
 - Having Hyperledger binaries installed and configuration files in your machine
 - Having node.js installed to run the Fabric and front-end applications
 - Attention: the local deployment is not completely equal to our own and the versions of the smart contracts and applications are not the same as ours (these are older versions)
 
 ### Hyperledger Fabric Network Deployment
+This project uses Fabric 2.5. Follow the "Getting Started" section of the [Hyperledger Fabric documentation](https://hyperledger-fabric.readthedocs.io/en/release-2.5/getting_started.html) to install the necessary binaries and configuration files.
+Otherwise, these are the recommended steps:
+```bash
+task chaintools
+```
+
 Inside the NetworkScripts folder, run the following commands (this will instatiate a operational local test network that mirrors our own with our chaincode):
 
 ```bash

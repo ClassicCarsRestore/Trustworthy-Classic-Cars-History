@@ -1,0 +1,107 @@
+version: '3'
+
+vars:
+  FABRIC_DIR: .fabric
+
+tasks:
+  chaintools:
+    cmds:
+      - mkdir -p .fabric
+      - task: _chaintools
+    silent: true
+
+  _chaintools:
+    internal: true
+    dir: '{{.FABRIC_DIR}}'
+    cmds:
+      - curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x install-fabric.sh
+      - ./install-fabric.sh docker binary samples
+      - sudo sh -c 'grep -qxF "127.0.0.1 orderer0.classicschain.com" /etc/hosts || echo "127.0.0.1 orderer0.classicschain.com" >> /etc/hosts'
+      - |
+        cat > env.sh << 'EOF'
+        #!/bin/bash
+        SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+        export PATH=$PATH:${SCRIPT_DIR}/fabric-samples/bin
+        echo "Fabric binaries added to PATH"
+        EOF
+      - chmod +x env.sh
+      - echo "To use fabric binaries, run 'source .fabric/env.sh'"
+    silent: true
+
+  prepare:
+    cmds:
+      - cryptogen generate --config=crypto-config.yaml --output ./.crypto-config
+      - mkdir -p ./.channel-artifacts
+      - configtxgen -profile ClassicsOrdererGenesis -channelID system-channel -outputBlock ./.channel-artifacts/genesis.block
+      - configtxgen -profile ClassicsChannel -outputCreateChannelTx ./.channel-artifacts/channel.tx -channelID main-channel
+      - configtxgen -profile ClassicsChannel -outputAnchorPeersUpdate ./.channel-artifacts/OwnersMSPanchors.tx -channelID main-channel -asOrg Owners
+      - configtxgen -profile ClassicsChannel -outputAnchorPeersUpdate ./.channel-artifacts/WorkshopsMSPanchors.tx -channelID main-channel -asOrg Workshops
+      - configtxgen -profile ClassicsChannel -outputAnchorPeersUpdate ./.channel-artifacts/CertifiersMSPanchors.tx -channelID main-channel -asOrg Certifiers
+
+  start-network:
+    cmds:
+      - docker compose up -d
+    silent: true
+
+  create-channel:
+    cmds:
+      - |
+        export FABRIC_CFG_PATH=$PWD
+        # Set environment for Owners peer0
+        export CORE_PEER_MSPCONFIGPATH=./.crypto-config/peerOrganizations/owners.classicschain.com/users/Admin@owners.classicschain.com/msp
+        export CORE_PEER_ADDRESS=localhost:7051
+        export CORE_PEER_LOCALMSPID="OwnersMSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/owners.classicschain.com/peers/peer0.owners.classicschain.com/tls/ca.crt
+        export CORE_PEER_TLS_ENABLED=true
+        peer channel create -o orderer0.classicschain.com -c main-channel -f ./.channel-artifacts/channel.tx --outputBlock ./main-channel.block --tls --cafile ./.crypto-config/ordererOrganizations/classicschain.com/orderers/orderer0.classicschain.com/tls/ca.crt
+
+  join-channel:
+    cmds:
+      - |
+        export FABRIC_CFG_PATH=$PWD
+        
+        # Join Owners peers
+        export CORE_PEER_MSPCONFIGPATH=./.crypto-config/peerOrganizations/owners.classicschain.com/users/Admin@owners.classicschain.com/msp
+        export CORE_PEER_ADDRESS=peer0.owners.classicschain.com:7051
+        export CORE_PEER_LOCALMSPID="OwnersMSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/owners.classicschain.com/peers/peer0.owners.classicschain.com/tls/ca.crt
+        export CORE_PEER_TLS_ENABLED=true
+        peer channel join -b ./main-channel.block
+        
+        export CORE_PEER_ADDRESS=peer1.owners.classicschain.com:8051
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/owners.classicschain.com/peers/peer1.owners.classicschain.com/tls/ca.crt
+        peer channel join -b ./main-channel.block
+        
+        # Join Workshops peers
+        export CORE_PEER_MSPCONFIGPATH=./.crypto-config/peerOrganizations/workshops.classicschain.com/users/Admin@workshops.classicschain.com/msp
+        export CORE_PEER_ADDRESS=peer0.workshops.classicschain.com:9051
+        export CORE_PEER_LOCALMSPID="WorkshopsMSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/workshops.classicschain.com/peers/peer0.workshops.classicschain.com/tls/ca.crt
+        peer channel join -b ./main-channel.block
+        
+        export CORE_PEER_ADDRESS=peer1.workshops.classicschain.com:10051
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/workshops.classicschain.com/peers/peer1.workshops.classicschain.com/tls/ca.crt
+        peer channel join -b ./main-channel.block
+        
+        # Join Certifiers peers
+        export CORE_PEER_MSPCONFIGPATH=./.crypto-config/peerOrganizations/certifiers.classicschain.com/users/Admin@certifiers.classicschain.com/msp
+        export CORE_PEER_ADDRESS=peer0.certifiers.classicschain.com:11051
+        export CORE_PEER_LOCALMSPID="CertifiersMSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/certifiers.classicschain.com/peers/peer0.certifiers.classicschain.com/tls/ca.crt
+        peer channel join -b ./main-channel.block
+        
+        export CORE_PEER_ADDRESS=peer1.certifiers.classicschain.com:12051
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/certifiers.classicschain.com/peers/peer1.certifiers.classicschain.com/tls/ca.crt
+        peer channel join -b ./main-channel.block
+
+  list-channels:
+    cmds:
+      - |
+        export FABRIC_CFG_PATH=$PWD
+        # Set environment for Owners peer0
+        export CORE_PEER_MSPCONFIGPATH=./.crypto-config/peerOrganizations/owners.classicschain.com/users/Admin@owners.classicschain.com/msp
+        export CORE_PEER_ADDRESS=peer0.owners.classicschain.com:7051
+        export CORE_PEER_LOCALMSPID="OwnersMSP"
+        export CORE_PEER_TLS_ROOTCERT_FILE=./.crypto-config/peerOrganizations/owners.classicschain.com/peers/peer0.owners.classicschain.com/tls/ca.crt
+        export CORE_PEER_TLS_ENABLED=true
+        peer channel list

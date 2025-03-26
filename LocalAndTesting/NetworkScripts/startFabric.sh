@@ -28,7 +28,9 @@ pushd ../TestNetwork
 #Using couch db
 #access: http://localhost:5984/_utils
 #./network.sh up createChannel -ca -s couchdb
-./network.sh deployCC -ccn ${1} -ccp ../Chaincode/chaincode-go/ -ccl go
+
+./network.sh deployCC -ccn ${1} -ccp ../../Chaincode/ -ccl go
+#./network.sh deployCC -ccn ${1} -ccp ../Chaincode/chaincode-go/ -ccl go
 #popd
 
 cat <<EOF

@@ -4,7 +4,6 @@ version: 1.0.0
 client:
   organization: ""
 organizations:
-  
   OrdererMSP:
     mspid: OrdererMSP
     cryptoPath: /tmp/cryptopath
@@ -365,7 +364,6 @@ peers:
         -----END CERTIFICATE-----
         
 certificateAuthorities:
-  
   ord-ca.default:
 
     url: https://ord-ca.classicschain.com:443
