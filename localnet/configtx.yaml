@@ -6,7 +6,7 @@
 ---
 Organizations:
   - &OrdererOrg
-    Name: OrdererOrg
+    Name: Orderer
     ID: OrdererMSP
     MSPDir: ./.crypto-config/ordererOrganizations/classicschain.com/msp
     Policies:
@@ -28,7 +28,7 @@ Organizations:
       - orderer2.classicschain.com:7050
 
   - &Owners
-    Name: OwnersMSP
+    Name: Owners
     ID: OwnersMSP
     MSPDir: ./.crypto-config/peerOrganizations/owners.classicschain.com/msp
     Policies:
@@ -49,7 +49,7 @@ Organizations:
         Port: 7051
 
   - &Workshops
-    Name: WorkshopsMSP
+    Name: Workshops
     ID: WorkshopsMSP
     MSPDir: ./.crypto-config/peerOrganizations/workshops.classicschain.com/msp
     Policies:
@@ -70,7 +70,7 @@ Organizations:
         Port: 7051
 
   - &Certifiers
-    Name: CertifiersMSP
+    Name: Certifiers
     ID: CertifiersMSP
     MSPDir: ./.crypto-config/peerOrganizations/certifiers.classicschain.com/msp
     Policies:
@@ -193,3 +193,19 @@ Profiles:
         - *Owners
         - *Workshops
         - *Certifiers
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "ANY Admins"
+        LifecycleEndorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"

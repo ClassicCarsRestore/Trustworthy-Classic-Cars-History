@@ -33,6 +33,8 @@ services:
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # DEV MODE
+      #- CORE_CHAINCODE_MODE=dev
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
     command: peer node start
